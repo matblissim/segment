@@ -1,0 +1,120 @@
+═══════════════════════════════════════════════════════════════════════════════
+🚀 INSTALLATION COMPLÈTE SANS UPLOAD - STRAVA GAMIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+COPIEZ-COLLEZ CES BLOCS UN PAR UN DANS VOTRE TERMINAL SSH
+
+
+ÉTAPE 1: CONNEXION
+══════════════════
+ssh mathieudottir@51.159.67.199
+
+
+ÉTAPE 2: INSTALLATION DES PRÉREQUIS
+════════════════════════════════════
+sudo apt update && sudo apt upgrade -y && sudo apt install -y curl build-essential git && curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs && echo "✅ Node: $(node --version)" && echo "✅ npm: $(npm --version)"
+
+
+ÉTAPE 3: CRÉER LE PROJET VITE
+══════════════════════════════
+cd ~ && npm create vite@latest strava-gamification -- --template react && cd strava-gamification && npm install
+
+
+ÉTAPE 4: INSTALLER LES DÉPENDANCES FRONTEND
+════════════════════════════════════════════
+npm install axios react-router-dom && npm install -D tailwindcss postcss autoprefixer concurrently
+
+
+ÉTAPE 5: CONFIGURER TAILWIND
+═════════════════════════════
+npx tailwindcss init -p
+
+cat > tailwind.config.js << 'EOF'
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: { strava: '#FC4C02' },
+    },
+  },
+  plugins: [],
+}
+EOF
+
+cat > src/index.css << 'EOF'
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+EOF
+
+
+ÉTAPE 6: CRÉER LA STRUCTURE BACKEND
+════════════════════════════════════
+mkdir -p server/routes
+
+cat > server/package.json << 'EOF'
+{
+  "name": "server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
+EOF
+
+cd server && npm install && cd ..
+
+
+ÉTAPE 7: CRÉER LE FICHIER server/server.js
+═══════════════════════════════════════════
+cat > server/server.js << 'EOF'
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import stravaRoutes from './routes/strava.js';
+import gamificationRoutes from './routes/gamification.js';
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(express.json());
+
+app.use('/api/strava', stravaRoutes);
+app.use('/api/gamification', gamificationRoutes);
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+});
+EOF
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STOP ICI! Les fichiers sont trop longs pour un seul message.
+
+Je vais créer un script téléchargeable via wget/curl.
+Voulez-vous que je continue ou préférez-vous une autre méthode?
+
