@@ -1,0 +1,95 @@
+═══════════════════════════════════════════════════════════════
+🚀 INSTALLATION ULTRA-RAPIDE - COPIER-COLLER CES COMMANDES
+═══════════════════════════════════════════════════════════════
+
+ÉTAPE 1: CONNEXION AU SERVEUR
+──────────────────────────────
+ssh mathieudottir@51.159.67.199
+
+
+ÉTAPE 2: INSTALLATION DES PRÉREQUIS (copier-coller tout d'un coup)
+─────────────────────────────────────────────────────────────────
+sudo apt update && sudo apt upgrade -y && sudo apt install -y curl build-essential git && curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs && node --version && npm --version && git --version
+
+
+ÉTAPE 3: CRÉER LE DOSSIER
+──────────────────────────
+mkdir -p ~/strava-gamification && cd ~/strava-gamification
+
+
+ÉTAPE 4: TRANSFÉRER L'ARCHIVE
+──────────────────────────────
+Sur VOTRE ORDINATEUR (pas le serveur), téléchargez d'abord:
+- Le fichier: strava-gamification-code.tar.gz
+
+Puis depuis VOTRE ORDINATEUR, tapez:
+
+scp /chemin/vers/strava-gamification-code.tar.gz mathieudottir@51.159.67.199:~/strava-gamification/
+
+(Remplacez /chemin/vers/ par le vrai chemin du fichier téléchargé)
+
+
+ÉTAPE 5: RETOUR SUR LE SERVEUR - DÉCOMPRESSER
+──────────────────────────────────────────────
+cd ~/strava-gamification && tar -xzf strava-gamification-code.tar.gz && ls -la
+
+
+ÉTAPE 6: INSTALLER LES DÉPENDANCES (prend 2-3 min)
+───────────────────────────────────────────────────
+npm install && cd server && npm install && cd ../client && npm install && cd ..
+
+
+ÉTAPE 7: CONFIGURER LES .ENV
+────────────────────────────
+Avant cette étape, allez sur: https://www.strava.com/settings/api
+Créez une app et notez:
+- Client ID
+- Client Secret
+
+Puis sur le serveur:
+
+cat > server/.env << 'EOF'
+STRAVA_CLIENT_ID=METTEZ_ICI_VOTRE_CLIENT_ID
+STRAVA_CLIENT_SECRET=METTEZ_ICI_VOTRE_CLIENT_SECRET
+REDIRECT_URI=http://51.159.67.199:5173/auth/callback
+PORT=3001
+EOF
+
+cat > client/.env << 'EOF'
+VITE_API_URL=http://51.159.67.199:3001/api
+EOF
+
+Puis éditez pour mettre vos VRAIES clés:
+
+nano server/.env
+
+Remplacez METTEZ_ICI_VOTRE_CLIENT_ID et METTEZ_ICI_VOTRE_CLIENT_SECRET
+Ctrl+X, puis Y, puis Entrée pour sauvegarder.
+
+
+ÉTAPE 8: OUVRIR LES PORTS (optionnel)
+──────────────────────────────────────
+sudo ufw allow 3001/tcp && sudo ufw allow 5173/tcp
+
+
+ÉTAPE 9: LANCER LE SITE
+────────────────────────
+cd ~/strava-gamification && npm run dev
+
+
+ÉTAPE 10: OUVRIR DANS LE NAVIGATEUR
+────────────────────────────────────
+http://51.159.67.199:5173
+
+
+═══════════════════════════════════════════════════════════════
+✅ C'EST TOUT!
+═══════════════════════════════════════════════════════════════
+
+RÉSUMÉ DES FICHIERS À TÉLÉCHARGER:
+- strava-gamification-code.tar.gz (60KB)
+
+RÉSUMÉ DES URLS À RETENIR:
+- Frontend: http://51.159.67.199:5173
+- Backend: http://51.159.67.199:3001
+- Strava API: https://www.strava.com/settings/api
