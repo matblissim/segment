@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { stravaApi, gamificationApi } from '../services/api';
+import { activitiesApi, gamificationApi } from '../services/api';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
-  const { user, accessToken, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
   const [badges, setBadges] = useState([]);
@@ -13,18 +13,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadData();
-  }, [accessToken]);
+  }, []);
 
   const loadData = async () => {
     try {
       setLoading(true);
 
-      // Récupérer les activités
-      const activitiesData = await stravaApi.getActivities(accessToken, 30);
-      setActivities(activitiesData);
+      // Récupérer les activités depuis la BDD
+      const activitiesData = await activitiesApi.getActivities(30);
+      setActivities(activitiesData.activities || activitiesData);
 
       // Calculer les stats de gamification
-      const gamificationData = await gamificationApi.calculateStats(activitiesData);
+      const gamificationData = await gamificationApi.calculateStats(activitiesData.activities || activitiesData);
       setStats(gamificationData.stats);
       setBadges(gamificationData.badges);
       setChallenges(gamificationData.challenges);

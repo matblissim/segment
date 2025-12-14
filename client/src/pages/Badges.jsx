@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { stravaApi, gamificationApi } from '../services/api';
+import { activitiesApi, gamificationApi } from '../services/api';
 import { Link } from 'react-router-dom';
 
 export default function Badges() {
-  const { user, accessToken, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [allBadges, setAllBadges] = useState([]);
   const [earnedBadges, setEarnedBadges] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadBadges();
-  }, [accessToken]);
+  }, []);
 
   const loadBadges = async () => {
     try {
@@ -22,7 +22,8 @@ export default function Badges() {
       setAllBadges(badgesData);
 
       // Récupérer les activités et calculer les badges gagnés
-      const activities = await stravaApi.getActivities(accessToken, 100);
+      const data = await activitiesApi.getActivities(100);
+      const activities = data.activities || data;
       const gamificationData = await gamificationApi.calculateStats(activities);
       setEarnedBadges(gamificationData.badges);
     } catch (error) {

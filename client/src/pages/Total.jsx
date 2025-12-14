@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Link } from 'react-router-dom';
 
 export default function Total() {
-  const { user, accessToken, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [yearlyData, setYearlyData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({

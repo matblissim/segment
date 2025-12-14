@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { stravaApi } from '../services/api';
+import { activitiesApi } from '../services/api';
 import { Link } from 'react-router-dom';
 
 export default function Activities() {
-  const { user, accessToken, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadActivities();
-  }, [accessToken]);
+  }, []);
 
   const loadActivities = async () => {
     try {
       setLoading(true);
-      const data = await stravaApi.getActivities(accessToken, 50);
-      setActivities(data);
+      const data = await activitiesApi.getActivities(50);
+      setActivities(data.activities || data);
     } catch (error) {
       console.error('Error loading activities:', error);
     } finally {

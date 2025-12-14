@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { stravaApi, gamificationApi } from '../services/api';
+import { activitiesApi, gamificationApi } from '../services/api';
 import { Link } from 'react-router-dom';
 
 export default function Challenges() {
-  const { user, accessToken, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadChallenges();
-  }, [accessToken]);
+  }, []);
 
   const loadChallenges = async () => {
     try {
       setLoading(true);
 
       // Récupérer les activités
-      const activities = await stravaApi.getActivities(accessToken, 100);
+      const data = await activitiesApi.getActivities(100);
+      const activities = data.activities || data;
 
       // Calculer les stats de gamification
       const gamificationData = await gamificationApi.calculateStats(activities);

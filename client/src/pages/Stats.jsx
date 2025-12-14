@@ -5,7 +5,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { Link } from 'react-router-dom';
 
 export default function Stats() {
-  const { user, accessToken, logout } = useAuth();
+  const { user, logout } = useAuth();
   const [weeklyData, setWeeklyData] = useState([]);
   const [loading, setLoading] = useState(true);
 
