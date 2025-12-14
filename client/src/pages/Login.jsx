@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { stravaApi } from '../services/api';
+import { authApi } from '../services/api';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -7,7 +7,7 @@ export default function Login() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const { url } = await stravaApi.getAuthUrl();
+      const { url } = await authApi.getAuthUrl();
       window.location.href = url;
     } catch (error) {
       console.error('Error getting auth URL:', error);
