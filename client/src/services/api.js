@@ -90,6 +90,13 @@ export const syncApi = {
     return response.data;
   },
 
+  getSyncInfo: async () => {
+    const response = await axios.get(`${API_BASE_URL}/sync/info`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
   getJobStatus: async (jobId) => {
     const response = await axios.get(`${API_BASE_URL}/sync/status/${jobId}`, {
       headers: getAuthHeaders(),

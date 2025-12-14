@@ -140,7 +140,7 @@ export default function Activities() {
                       <div>
                         <p className="text-gray-600 text-sm">Distance</p>
                         <p className="text-lg font-semibold text-gray-900">
-                          {(activity.distance / 1000).toFixed(2)} km
+                          {(Number(activity.distance || 0) / 1000).toFixed(2)} km
                         </p>
                       </div>
                       <div>
@@ -152,13 +152,13 @@ export default function Activities() {
                       <div>
                         <p className="text-gray-600 text-sm">Dénivelé</p>
                         <p className="text-lg font-semibold text-gray-900">
-                          {activity.total_elevation_gain?.toFixed(0) || 0} m
+                          {Number(activity.total_elevation_gain || 0).toFixed(0)} m
                         </p>
                       </div>
                       <div>
                         <p className="text-gray-600 text-sm">Vitesse moy.</p>
                         <p className="text-lg font-semibold text-gray-900">
-                          {((activity.distance / 1000) / (activity.moving_time / 3600)).toFixed(1)} km/h
+                          {(Number(activity.distance || 0) / 1000 / (Number(activity.moving_time || 1) / 3600)).toFixed(1)} km/h
                         </p>
                       </div>
                     </div>
