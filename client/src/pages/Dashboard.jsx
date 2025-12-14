@@ -328,13 +328,23 @@ export default function Dashboard() {
                           <div className="space-y-1 max-h-60 overflow-y-auto">
                             {badge.activities.map((activity) => (
                               <div key={activity.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
-                                <div>
+                                <div className="flex-1">
                                   <Typography variant="small" color="blue-gray">
                                     {activity.name || `${activity.type} - ${new Date(activity.start_date).toLocaleDateString()}`}
                                   </Typography>
-                                  <Typography variant="small" color="gray">
-                                    {new Date(activity.start_date).toLocaleDateString('fr-FR')}
-                                  </Typography>
+                                  <div className="flex items-center gap-2">
+                                    <Typography variant="small" color="gray">
+                                      {new Date(activity.start_date).toLocaleDateString('fr-FR')}
+                                    </Typography>
+                                    {activity.city && (
+                                      <>
+                                        <span className="text-gray-400">•</span>
+                                        <Typography variant="small" color="gray">
+                                          📍 {activity.city}
+                                        </Typography>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
                                 <Typography variant="small" color="blue-gray" className="font-semibold">
                                   {(activity.distance / 1000).toFixed(1)} km

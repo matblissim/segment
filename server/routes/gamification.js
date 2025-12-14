@@ -31,11 +31,15 @@ const calculatePoints = (activity) => {
   return points;
 };
 
-// Définition des badges (basés sur comptage d'activités)
+// Types d'activités de course à pied acceptés
+const RUNNING_TYPES = ['Run', 'TrailRun', 'VirtualRun', 'Trail'];
+
+// Définition des badges (basés sur comptage d'activités de course à pied uniquement)
 const DISTANCE_BADGES = [
-  { id: 'semi_marathon', name: 'Semi-Marathon', description: 'Activités de 21.1 km ou plus', icon: '🏃', threshold: 21100, excludeAbove: 42200 },
-  { id: 'marathon', name: 'Marathon', description: 'Activités de 42.2 km ou plus', icon: '🏅', threshold: 42200, excludeAbove: 100000 },
-  { id: 'ultra_100k', name: '100 KM', description: 'Activités de 100 km ou plus', icon: '💯', threshold: 100000, excludeAbove: null },
+  { id: 'semi_marathon', name: 'Semi-Marathon', description: 'Course à pied/Trail de 21.1 km ou plus', icon: '🏃', threshold: 21100, excludeAbove: 42200 },
+  { id: 'marathon', name: 'Marathon', description: 'Course à pied/Trail de 42.2 km ou plus', icon: '🏅', threshold: 42200, excludeAbove: 100000 },
+  { id: 'ultra_100k', name: '100 KM', description: 'Course à pied/Trail de 100 km ou plus', icon: '💯', threshold: 100000, excludeAbove: null },
+  { id: 'week_100k', name: 'Semaine 100K+', description: 'Semaines avec 100+ km de course à pied', icon: '📅', threshold: 100000, weekly: true },
 ];
 
 // Définition des challenges
@@ -121,30 +125,67 @@ router.post('/calculate-stats', (req, res) => {
     }
   }
 
+  // Filtrer uniquement les activités de course à pied
+  const runningActivities = activities.filter(a => RUNNING_TYPES.includes(a.type));
+
   // Calculer les badges de distance (avec comptage et liste des activités)
   const distanceBadges = DISTANCE_BADGES.map(badge => {
-    const matchingActivities = activities.filter(activity => {
-      const distance = activity.distance || 0;
+    let matchingActivities = [];
+    let count = 0;
 
-      // Vérifier si l'activité est dans la plage de ce badge
-      if (distance < badge.threshold) return false;
+    if (badge.weekly) {
+      // Badge hebdomadaire: grouper par semaine (lundi-dimanche)
+      const weekGroups = {};
 
-      // Exclure si au-dessus du seuil supérieur (éviter le double comptage)
-      if (badge.excludeAbove && distance >= badge.excludeAbove) return false;
+      runningActivities.forEach(activity => {
+        const date = new Date(activity.start_date);
+        // Calculer le lundi de la semaine
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(date.setDate(diff));
+        const weekKey = monday.toISOString().split('T')[0];
 
-      return true;
-    });
+        if (!weekGroups[weekKey]) {
+          weekGroups[weekKey] = { distance: 0, activities: [], weekStart: weekKey };
+        }
+        weekGroups[weekKey].distance += activity.distance || 0;
+        weekGroups[weekKey].activities.push(activity);
+      });
+
+      // Filtrer les semaines >= 100km
+      matchingActivities = Object.values(weekGroups)
+        .filter(week => week.distance >= badge.threshold)
+        .flatMap(week => week.activities);
+
+      count = Object.values(weekGroups).filter(week => week.distance >= badge.threshold).length;
+    } else {
+      // Badge par activité individuelle
+      matchingActivities = runningActivities.filter(activity => {
+        const distance = activity.distance || 0;
+
+        // Vérifier si l'activité est dans la plage de ce badge
+        if (distance < badge.threshold) return false;
+
+        // Exclure si au-dessus du seuil supérieur (éviter le double comptage)
+        if (badge.excludeAbove && distance >= badge.excludeAbove) return false;
+
+        return true;
+      });
+
+      count = matchingActivities.length;
+    }
 
     return {
       ...badge,
-      count: matchingActivities.length,
-      earned: matchingActivities.length > 0,
+      count,
+      earned: count > 0,
       activities: matchingActivities.map(a => ({
         id: a.id,
         name: a.name,
         distance: a.distance,
         start_date: a.start_date,
-        type: a.type
+        type: a.type,
+        city: a.start_city || a.location_city || a.timezone?.split('/')[1] || 'Non spécifiée'
       }))
     };
   });

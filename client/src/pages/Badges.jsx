@@ -187,18 +187,28 @@ export default function Badges() {
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {badge.activities.map((activity) => (
                       <div key={activity.id} className="flex justify-between items-center p-3 hover:bg-orange-50 rounded-lg transition">
-                        <div>
+                        <div className="flex-1 mr-4">
                           <Typography variant="small" color="blue-gray" className="font-medium">
                             {activity.name || `${activity.type} - ${new Date(activity.start_date).toLocaleDateString()}`}
                           </Typography>
-                          <Typography variant="small" color="gray">
-                            {new Date(activity.start_date).toLocaleDateString('fr-FR', {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </Typography>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Typography variant="small" color="gray">
+                              {new Date(activity.start_date).toLocaleDateString('fr-FR', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
+                            </Typography>
+                            {activity.city && (
+                              <>
+                                <span className="text-gray-400">•</span>
+                                <Typography variant="small" color="blue-gray" className="flex items-center gap-1">
+                                  📍 <span className="font-medium">{activity.city}</span>
+                                </Typography>
+                              </>
+                            )}
+                          </div>
                         </div>
                         <Chip
                           value={`${(activity.distance / 1000).toFixed(1)} km`}
