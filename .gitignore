@@ -35,3 +35,6 @@ Thumbs.db
 # Cache
 .cache/
 .parcel-cache/
+
+# Redis
+dump.rdb
