@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { stravaApi, gamificationApi } from '../services/api';
+import { activitiesApi } from '../services/api';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 
@@ -11,47 +11,20 @@ export default function Stats() {
 
   useEffect(() => {
     loadWeeklyStats();
-  }, [accessToken]);
+  }, []);
 
   const loadWeeklyStats = async () => {
     try {
-      const activities = await stravaApi.getActivities(accessToken, 200);
+      // Utiliser la nouvelle API qui récupère depuis la BDD avec cache Redis
+      const stats = await activitiesApi.getWeeklyStats();
 
-      const weeklyStats = {};
-
-      activities.forEach(activity => {
-        const date = new Date(activity.start_date);
-        const weekStart = getWeekStart(date);
-        const weekKey = weekStart.toISOString().split('T')[0];
-
-        if (!weeklyStats[weekKey]) {
-          weeklyStats[weekKey] = {
-            weekDate: weekStart,
-            week: formatWeek(weekStart),
-            distance: 0,
-            activities: 0,
-            elevation: 0,
-            points: 0
-          };
-        }
-
-        weeklyStats[weekKey].distance += (activity.distance / 1000);
-        weeklyStats[weekKey].elevation += (activity.total_elevation_gain || 0);
-        weeklyStats[weekKey].activities += 1;
-        weeklyStats[weekKey].points += calculatePoints(activity);
-      });
-
-      const allWeeks = Object.values(weeklyStats)
-        .sort((a, b) => a.weekDate - b.weekDate);
-
-      const last8Weeks = allWeeks.slice(-8);
-
-      const data = last8Weeks.map(week => ({
-        week: week.week,
-        distance: Math.round(week.distance * 10) / 10,
-        activities: week.activities,
-        elevation: Math.round(week.elevation),
-        points: Math.round(week.points)
+      // Formatter les données pour les graphiques
+      const data = stats.map(week => ({
+        week: formatWeek(new Date(week.week_start)),
+        distance: Math.round(parseFloat(week.total_distance_km) * 10) / 10,
+        activities: parseInt(week.activity_count),
+        elevation: Math.round(parseFloat(week.total_elevation)),
+        points: parseInt(week.total_points)
       }));
 
       setWeeklyData(data);
@@ -62,27 +35,10 @@ export default function Stats() {
     }
   };
 
-  const getWeekStart = (date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  };
-
   const formatWeek = (date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     return `${day}/${month}`;
-  };
-
-  const calculatePoints = (activity) => {
-    let points = Math.floor((activity.distance / 1000) * 10);
-    if (activity.total_elevation_gain) {
-      points += Math.floor(activity.total_elevation_gain / 10);
-    }
-    return points;
   };
 
   if (loading) {

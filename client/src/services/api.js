@@ -2,7 +2,110 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-// Strava API
+// Helper pour ajouter le token JWT aux requêtes
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('jwt_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+// Auth API (nouvelle architecture)
+export const authApi = {
+  getAuthUrl: async () => {
+    const response = await axios.get(`${API_BASE_URL}/auth/strava/auth-url`);
+    return response.data;
+  },
+
+  login: async (code) => {
+    const response = await axios.post(`${API_BASE_URL}/auth/strava/callback`, { code });
+    // Sauvegarder le JWT token
+    if (response.data.token) {
+      localStorage.setItem('jwt_token', response.data.token);
+    }
+    return response.data;
+  },
+
+  getMe: async () => {
+    const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  logout: () => {
+    localStorage.removeItem('jwt_token');
+  },
+
+  isAuthenticated: () => {
+    return !!localStorage.getItem('jwt_token');
+  },
+};
+
+// Activities API (nouvelle architecture - depuis BDD)
+export const activitiesApi = {
+  getActivities: async (limit = 30, offset = 0) => {
+    const response = await axios.get(`${API_BASE_URL}/activities`, {
+      headers: getAuthHeaders(),
+      params: { limit, offset },
+    });
+    return response.data;
+  },
+
+  getAllActivities: async () => {
+    const response = await axios.get(`${API_BASE_URL}/activities/all`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getWeeklyStats: async () => {
+    const response = await axios.get(`${API_BASE_URL}/activities/stats/weekly`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getYearlyStats: async () => {
+    const response = await axios.get(`${API_BASE_URL}/activities/stats/yearly`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getCount: async () => {
+    const response = await axios.get(`${API_BASE_URL}/activities/count`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+};
+
+// Sync API (nouvelle architecture)
+export const syncApi = {
+  startSync: async (fullSync = false) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/sync/start`,
+      { fullSync },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  getJobStatus: async (jobId) => {
+    const response = await axios.get(`${API_BASE_URL}/sync/status/${jobId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getHistory: async () => {
+    const response = await axios.get(`${API_BASE_URL}/sync/history`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+};
+
+// Legacy Strava API (compatibilité)
 export const stravaApi = {
   getAuthUrl: async () => {
     const response = await axios.get(`${API_BASE_URL}/strava/auth-url`);

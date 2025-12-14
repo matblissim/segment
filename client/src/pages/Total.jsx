@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { stravaApi } from '../services/api';
+import { activitiesApi } from '../services/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 
@@ -16,30 +16,20 @@ export default function Total() {
   });
 
   useEffect(() => {
-    loadAllActivities();
-  }, [accessToken]);
+    loadYearlyStats();
+  }, []);
 
-  const loadAllActivities = async () => {
+  const loadYearlyStats = async () => {
     try {
-      let allActivities = [];
-      let page = 1;
-      let hasMore = true;
+      // Utiliser la nouvelle API qui récupère depuis la BDD avec cache
+      const stats = await activitiesApi.getYearlyStats();
 
-      while (hasMore && page <= 50) {
-        const activities = await stravaApi.getActivities(accessToken, 200, page);
-        if (activities.length === 0) {
-          hasMore = false;
-        } else {
-          allActivities = [...allActivities, ...activities];
-          page++;
-        }
-      }
-
+      // Grouper par année et sport
       const yearlyStats = {};
 
-      allActivities.forEach(activity => {
-        const year = new Date(activity.start_date).getFullYear();
-        const sportType = getSportType(activity.type);
+      stats.forEach(stat => {
+        const year = stat.year;
+        const sportType = getSportType(stat.type);
 
         if (sportType === 'Marche') return;
 
@@ -53,7 +43,7 @@ export default function Total() {
           };
         }
 
-        const distanceKm = activity.distance / 1000;
+        const distanceKm = parseFloat(stat.total_distance_km);
         yearlyStats[year][sportType] += distanceKm;
       });
 
