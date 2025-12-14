@@ -121,9 +121,9 @@ router.post('/calculate-stats', (req, res) => {
     }
   }
 
-  // Calculer les badges de distance (avec comptage)
+  // Calculer les badges de distance (avec comptage et liste des activités)
   const distanceBadges = DISTANCE_BADGES.map(badge => {
-    const count = activities.filter(activity => {
+    const matchingActivities = activities.filter(activity => {
       const distance = activity.distance || 0;
 
       // Vérifier si l'activité est dans la plage de ce badge
@@ -133,12 +133,19 @@ router.post('/calculate-stats', (req, res) => {
       if (badge.excludeAbove && distance >= badge.excludeAbove) return false;
 
       return true;
-    }).length;
+    });
 
     return {
       ...badge,
-      count,
-      earned: count > 0
+      count: matchingActivities.length,
+      earned: matchingActivities.length > 0,
+      activities: matchingActivities.map(a => ({
+        id: a.id,
+        name: a.name,
+        distance: a.distance,
+        start_date: a.start_date,
+        type: a.type
+      }))
     };
   });
 
