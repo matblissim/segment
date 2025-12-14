@@ -31,29 +31,11 @@ const calculatePoints = (activity) => {
   return points;
 };
 
-// Définition des badges
-const BADGES = [
-  // Distance
-  { id: 'first_km', name: 'Premier Kilomètre', description: 'Parcourir 1 km', icon: '🏃', condition: (stats) => stats.totalDistance >= 1000 },
-  { id: 'marathon', name: 'Marathon', description: 'Parcourir 42 km en une activité', icon: '🏅', condition: (stats) => stats.longestDistance >= 42000 },
-  { id: 'century', name: 'Century', description: 'Parcourir 100 km en une activité', icon: '💯', condition: (stats) => stats.longestDistance >= 100000 },
-  { id: 'explorer', name: 'Explorateur', description: 'Parcourir 1000 km au total', icon: '🗺️', condition: (stats) => stats.totalDistance >= 1000000 },
-
-  // Élévation
-  { id: 'climber', name: 'Grimpeur', description: 'Cumuler 1000m de dénivelé', icon: '⛰️', condition: (stats) => stats.totalElevation >= 1000 },
-  { id: 'mountain_king', name: 'Roi des Montagnes', description: 'Cumuler 10000m de dénivelé', icon: '👑', condition: (stats) => stats.totalElevation >= 10000 },
-
-  // Régularité
-  { id: 'consistent', name: 'Régulier', description: 'Faire 7 activités en 7 jours', icon: '📅', condition: (stats) => stats.sevenDayStreak },
-  { id: 'dedicated', name: 'Dévoué', description: 'Faire 30 activités au total', icon: '💪', condition: (stats) => stats.totalActivities >= 30 },
-
-  // Vitesse
-  { id: 'speed_demon', name: 'Démon de Vitesse', description: 'Atteindre 40 km/h en moyenne', icon: '⚡', condition: (stats) => stats.topSpeed >= 40 },
-
-  // Points
-  { id: 'points_1k', name: 'Apprenti', description: 'Atteindre 1000 points', icon: '🌟', condition: (stats) => stats.totalPoints >= 1000 },
-  { id: 'points_5k', name: 'Expert', description: 'Atteindre 5000 points', icon: '✨', condition: (stats) => stats.totalPoints >= 5000 },
-  { id: 'points_10k', name: 'Maître', description: 'Atteindre 10000 points', icon: '🏆', condition: (stats) => stats.totalPoints >= 10000 },
+// Définition des badges (basés sur comptage d'activités)
+const DISTANCE_BADGES = [
+  { id: 'semi_marathon', name: 'Semi-Marathon', description: 'Activités de 21.1 km ou plus', icon: '🏃', threshold: 21100, excludeAbove: 42200 },
+  { id: 'marathon', name: 'Marathon', description: 'Activités de 42.2 km ou plus', icon: '🏅', threshold: 42200, excludeAbove: 100000 },
+  { id: 'ultra_100k', name: '100 KM', description: 'Activités de 100 km ou plus', icon: '💯', threshold: 100000, excludeAbove: null },
 ];
 
 // Définition des challenges
@@ -139,8 +121,26 @@ router.post('/calculate-stats', (req, res) => {
     }
   }
 
-  // Calculer les badges obtenus
-  const earnedBadges = BADGES.filter(badge => badge.condition(stats));
+  // Calculer les badges de distance (avec comptage)
+  const distanceBadges = DISTANCE_BADGES.map(badge => {
+    const count = activities.filter(activity => {
+      const distance = activity.distance || 0;
+
+      // Vérifier si l'activité est dans la plage de ce badge
+      if (distance < badge.threshold) return false;
+
+      // Exclure si au-dessus du seuil supérieur (éviter le double comptage)
+      if (badge.excludeAbove && distance >= badge.excludeAbove) return false;
+
+      return true;
+    }).length;
+
+    return {
+      ...badge,
+      count,
+      earned: count > 0
+    };
+  });
 
   // Calculer la progression des challenges
   const challengeProgress = CHALLENGES.map(challenge => {
@@ -176,16 +176,16 @@ router.post('/calculate-stats', (req, res) => {
 
   res.json({
     stats,
-    badges: earnedBadges,
+    badges: distanceBadges,
     challenges: challengeProgress,
-    totalBadges: earnedBadges.length,
+    totalBadges: distanceBadges.filter(b => b.earned).length,
     totalChallengesCompleted: challengeProgress.filter(c => c.completed).length
   });
 });
 
 // Obtenir tous les badges disponibles
 router.get('/badges', (req, res) => {
-  res.json(BADGES);
+  res.json(DISTANCE_BADGES);
 });
 
 // Obtenir tous les challenges disponibles

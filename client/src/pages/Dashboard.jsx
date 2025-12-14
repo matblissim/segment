@@ -291,17 +291,28 @@ export default function Dashboard() {
               </Typography>
             </CardHeader>
             <CardBody className="pt-0">
-              {badges.length > 0 ? (
-                <div className="grid grid-cols-2 gap-4">
-                  {badges.slice(0, 4).map((badge) => (
-                    <div key={badge.id} className="text-center rounded-lg bg-orange-50 p-4">
-                      <div className="text-4xl mb-2">{badge.icon}</div>
-                      <Typography variant="small" color="blue-gray" className="font-bold">
-                        {badge.name}
-                      </Typography>
-                      <Typography variant="small" color="gray" className="font-normal">
-                        {badge.description}
-                      </Typography>
+              {badges.filter(b => b.earned).length > 0 ? (
+                <div className="space-y-3">
+                  {badges.filter(b => b.earned).map((badge) => (
+                    <div key={badge.id} className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200">
+                      <div className="flex items-center gap-3">
+                        <div className="text-3xl">{badge.icon}</div>
+                        <div>
+                          <Typography variant="small" color="blue-gray" className="font-bold">
+                            {badge.name}
+                          </Typography>
+                          <Typography variant="small" color="gray" className="font-normal">
+                            {badge.description}
+                          </Typography>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Chip
+                          value={`×${badge.count}`}
+                          size="lg"
+                          className="bg-gradient-to-r from-orange-500 to-deep-orange-600 text-white font-bold"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
