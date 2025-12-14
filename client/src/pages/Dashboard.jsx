@@ -122,7 +122,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-gray-600 text-sm">Distance Totale</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {((stats?.totalDistance || 0) / 1000).toFixed(1)} km
+                  {(Number(stats?.totalDistance || 0) / 1000).toFixed(1)} km
                 </p>
               </div>
               <div className="text-4xl">🚴</div>
@@ -144,7 +144,7 @@ export default function Dashboard() {
               <div>
                 <p className="text-gray-600 text-sm">Dénivelé Total</p>
                 <p className="text-3xl font-bold text-gray-900">
-                  {(stats?.totalElevation || 0).toFixed(0)} m
+                  {Number(stats?.totalElevation || 0).toFixed(0)} m
                 </p>
               </div>
               <div className="text-4xl">⛰️</div>
@@ -196,7 +196,7 @@ export default function Dashboard() {
                     ></div>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
-                    {challenge.progress.toFixed(1)}% complété
+                    {Number(challenge.progress || 0).toFixed(1)}% complété
                     {challenge.completed && <span className="text-green-600 ml-2">✓ Terminé!</span>}
                   </p>
                 </div>
