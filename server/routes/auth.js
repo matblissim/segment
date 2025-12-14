@@ -1,5 +1,6 @@
 import express from 'express';
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { generateToken } from '../middleware/auth.js';
 import { addSyncJob } from '../workers/syncWorker.js';
@@ -85,7 +86,6 @@ router.get('/me', async (req, res) => {
     }
 
     // Décoder le token (simpliste, devrait utiliser le middleware)
-    const jwt = require('jsonwebtoken');
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-change-in-production');
 
     const user = await User.findById(decoded.userId);
