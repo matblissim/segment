@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
+import Stats from './pages/Stats';
+import Total from './pages/Total';
 import Activities from './pages/Activities';
 import Badges from './pages/Badges';
 import Challenges from './pages/Challenges';
@@ -52,6 +54,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Badges />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <ProtectedRoute>
+                <Stats />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/total"
+            element={
+              <ProtectedRoute>
+                <Total />
               </ProtectedRoute>
             }
           />

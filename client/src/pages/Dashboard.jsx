@@ -84,6 +84,12 @@ export default function Dashboard() {
             <Link to="/dashboard" className="text-strava font-semibold border-b-2 border-strava pb-1">
               Tableau de bord
             </Link>
+            <Link to="/stats" className="text-gray-600 hover:text-strava">
+              Statistiques
+            </Link>
+            <Link to="/total" className="text-gray-600 hover:text-strava">
+              Total
+            </Link>
             <Link to="/activities" className="text-gray-600 hover:text-strava">
               Activités
             </Link>
