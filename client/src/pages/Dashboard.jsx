@@ -57,8 +57,8 @@ export default function Dashboard() {
 
   // Calculer les stats selon le sport sélectionné
   const stats = {
-    totalDistance: filteredActivities.reduce((sum, a) => sum + (a.distance || 0), 0),
-    totalElevation: filteredActivities.reduce((sum, a) => sum + (a.total_elevation_gain || 0), 0),
+    totalDistance: Number(filteredActivities.reduce((sum, a) => sum + (Number(a.distance) || 0), 0)) || 0,
+    totalElevation: Number(filteredActivities.reduce((sum, a) => sum + (Number(a.total_elevation_gain) || 0), 0)) || 0,
     activityCount: filteredActivities.length,
   };
 

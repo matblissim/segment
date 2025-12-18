@@ -61,8 +61,8 @@ export default function Stats() {
         };
       }
 
-      weekGroups[weekKey].distance += (activity.distance || 0) / 1000;
-      weekGroups[weekKey].elevation += activity.total_elevation_gain || 0;
+      weekGroups[weekKey].distance += (Number(activity.distance) || 0) / 1000;
+      weekGroups[weekKey].elevation += Number(activity.total_elevation_gain) || 0;
       weekGroups[weekKey].activities += 1;
     });
 
@@ -98,8 +98,8 @@ export default function Stats() {
         };
       }
 
-      yearGroups[year].distance += (activity.distance || 0) / 1000;
-      yearGroups[year].elevation += activity.total_elevation_gain || 0;
+      yearGroups[year].distance += (Number(activity.distance) || 0) / 1000;
+      yearGroups[year].elevation += Number(activity.total_elevation_gain) || 0;
       yearGroups[year].activities += 1;
     });
 
