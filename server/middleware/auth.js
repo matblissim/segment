@@ -74,4 +74,24 @@ export async function optionalAuth(req, res, next) {
   next();
 }
 
-export default { generateToken, authenticateToken, optionalAuth };
+// Middleware pour vérifier que l'utilisateur est admin
+export async function requireAdmin(req, res, next) {
+  try {
+    if (!req.user || !req.userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const isAdmin = await User.isAdmin(req.userId);
+
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Admin verification error:', error);
+    return res.status(500).json({ error: 'Admin verification failed' });
+  }
+}
+
+export default { generateToken, authenticateToken, optionalAuth, requireAdmin };

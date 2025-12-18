@@ -99,6 +99,38 @@ class User {
     const result = await pool.query(query);
     return result.rows;
   }
+
+  // Admin: Récupérer tous les utilisateurs
+  static async findAll() {
+    const query = `
+      SELECT
+        id, strava_id, username, firstname, lastname,
+        profile_photo, created_at, last_sync_at, sync_status, role
+      FROM users
+      ORDER BY created_at DESC
+    `;
+    const result = await pool.query(query);
+    return result.rows;
+  }
+
+  // Admin: Mettre à jour le rôle d'un utilisateur
+  static async updateRole(userId, role) {
+    const query = `
+      UPDATE users
+      SET role = $1
+      WHERE id = $2
+      RETURNING id, strava_id, username, firstname, lastname, role
+    `;
+    const result = await pool.query(query, [role, userId]);
+    return result.rows[0];
+  }
+
+  // Vérifier si un utilisateur est admin
+  static async isAdmin(userId) {
+    const query = 'SELECT role FROM users WHERE id = $1';
+    const result = await pool.query(query, [userId]);
+    return result.rows[0]?.role === 'admin';
+  }
 }
 
 export default User;

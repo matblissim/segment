@@ -10,6 +10,7 @@ import gamificationRoutes from './routes/gamification.js';
 import authRoutes from './routes/auth.js';
 import activitiesRoutes from './routes/activities.js';
 import syncRoutes from './routes/sync.js';
+import adminRoutes from './routes/admin.js';
 
 // Import de la configuration DB et du worker
 import { pool, redis } from './config/database.js';
@@ -36,6 +37,9 @@ app.use('/api/activities', activitiesRoutes);
 
 // Routes de synchronisation (nouvelles)
 app.use('/api/sync', syncRoutes);
+
+// Routes admin (nécessite authentification + rôle admin)
+app.use('/api/admin', adminRoutes);
 
 // Routes Strava legacy (pour compatibilité)
 app.use('/api/strava', stravaRoutes);

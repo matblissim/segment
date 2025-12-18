@@ -153,7 +153,8 @@ router.post('/calculate-stats', (req, res) => {
           // Calculer le lundi de la semaine
           const day = date.getDay();
           const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-          const monday = new Date(date.setDate(diff));
+          const monday = new Date(date);
+          monday.setDate(diff);
           const weekKey = monday.toISOString().split('T')[0];
 
           if (!weekGroups[weekKey]) {

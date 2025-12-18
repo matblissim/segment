@@ -173,3 +173,22 @@ export const gamificationApi = {
     return response.data;
   }
 };
+
+// Admin API (nécessite rôle admin)
+export const adminApi = {
+  getUsers: async () => {
+    const response = await axios.get(`${API_BASE_URL}/admin/users`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  updateUserRole: async (userId, role) => {
+    const response = await axios.put(
+      `${API_BASE_URL}/admin/users/${userId}/role`,
+      { role },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+};

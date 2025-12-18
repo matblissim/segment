@@ -200,6 +200,18 @@ export default function Layout({ children, showSportToggle = true }) {
                 Profil
               </Button>
             </Link>
+            {user?.role === 'admin' && (
+              <Link to="/admin">
+                <Button
+                  color="gray"
+                  variant="text"
+                  size="sm"
+                  className={`rounded-none ${isActive('/admin') ? 'border-b-2 border-gray-900' : ''}`}
+                >
+                  Admin
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
