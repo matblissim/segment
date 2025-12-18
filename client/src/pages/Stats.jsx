@@ -1,38 +1,117 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { activitiesApi } from '../services/api';
+import { useSportFilter } from '../contexts/SportFilterContext';
+import Layout from '../components/Layout';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Link } from 'react-router-dom';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Typography,
+  Button,
+} from "@material-tailwind/react";
 
 export default function Stats() {
-  const { user, logout } = useAuth();
-  const [weeklyData, setWeeklyData] = useState([]);
+  const { sportFilter } = useSportFilter();
+  const [allActivities, setAllActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('semaine'); // 'semaine' ou 'annee'
 
   useEffect(() => {
-    loadWeeklyStats();
+    loadActivities();
   }, []);
 
-  const loadWeeklyStats = async () => {
+  const loadActivities = async () => {
     try {
-      // Utiliser la nouvelle API qui récupère depuis la BDD avec cache Redis
-      const stats = await activitiesApi.getWeeklyStats();
-
-      // Formatter les données pour les graphiques
-      const data = stats.map(week => ({
-        week: formatWeek(new Date(week.week_start)),
-        distance: Math.round(parseFloat(week.total_distance_km) * 10) / 10,
-        activities: parseInt(week.activity_count),
-        elevation: Math.round(parseFloat(week.total_elevation)),
-        points: parseInt(week.total_points)
-      }));
-
-      setWeeklyData(data);
-      setLoading(false);
+      setLoading(true);
+      const data = await activitiesApi.getAllActivities();
+      setAllActivities(data.activities || data);
     } catch (error) {
-      console.error('Error loading weekly stats:', error);
+      console.error('Error loading activities:', error);
+    } finally {
       setLoading(false);
     }
+  };
+
+  // Filtrer les activités selon le sport
+  const RUNNING_TYPES = ['Run', 'TrailRun', 'VirtualRun', 'Trail'];
+  const CYCLING_TYPES = ['Ride', 'VirtualRide', 'EBikeRide'];
+
+  const filteredActivities = sportFilter === 'running'
+    ? allActivities.filter(a => RUNNING_TYPES.includes(a.type))
+    : allActivities.filter(a => CYCLING_TYPES.includes(a.type));
+
+  // Calculer les stats hebdomadaires pour les 8 dernières semaines
+  const getWeeklyStats = () => {
+    const weekGroups = {};
+
+    filteredActivities.forEach(activity => {
+      const date = new Date(activity.start_date);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(date.setDate(diff));
+      const weekKey = monday.toISOString().split('T')[0];
+
+      if (!weekGroups[weekKey]) {
+        weekGroups[weekKey] = {
+          week: weekKey,
+          distance: 0,
+          elevation: 0,
+          activities: 0
+        };
+      }
+
+      weekGroups[weekKey].distance += (activity.distance || 0) / 1000;
+      weekGroups[weekKey].elevation += activity.total_elevation_gain || 0;
+      weekGroups[weekKey].activities += 1;
+    });
+
+    // Trier et prendre les 8 dernières semaines
+    const sortedWeeks = Object.values(weekGroups)
+      .sort((a, b) => new Date(b.week) - new Date(a.week))
+      .slice(0, 8)
+      .reverse();
+
+    // Formater les données
+    return sortedWeeks.map(week => ({
+      period: formatWeek(new Date(week.week)),
+      distance: Math.round(week.distance * 10) / 10,
+      elevation: Math.round(week.elevation),
+      activities: week.activities
+    }));
+  };
+
+  // Calculer les stats annuelles
+  const getYearlyStats = () => {
+    const yearGroups = {};
+
+    filteredActivities.forEach(activity => {
+      const date = new Date(activity.start_date);
+      const year = date.getFullYear();
+
+      if (!yearGroups[year]) {
+        yearGroups[year] = {
+          year,
+          distance: 0,
+          elevation: 0,
+          activities: 0
+        };
+      }
+
+      yearGroups[year].distance += (activity.distance || 0) / 1000;
+      yearGroups[year].elevation += activity.total_elevation_gain || 0;
+      yearGroups[year].activities += 1;
+    });
+
+    // Trier par année
+    return Object.values(yearGroups)
+      .sort((a, b) => a.year - b.year)
+      .map(year => ({
+        period: year.year.toString(),
+        distance: Math.round(year.distance * 10) / 10,
+        elevation: Math.round(year.elevation),
+        activities: year.activities
+      }));
   };
 
   const formatWeek = (date) => {
@@ -43,112 +122,135 @@ export default function Stats() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <p>Chargement des statistiques...</p>
-      </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 mx-auto mb-4"></div>
+            <Typography variant="h6" color="gray">
+              Chargement des statistiques...
+            </Typography>
+          </div>
+        </div>
+      </Layout>
     );
-  }
+  };
+
+  const statsData = viewMode === 'semaine' ? getWeeklyStats() : getYearlyStats();
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {user?.firstname} {user?.lastname}
-            </h1>
-            <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
-              Déconnexion
-            </button>
-          </div>
+    <Layout>
+      <div className="flex items-center justify-between mb-6">
+        <Typography variant="h4" color="blue-gray">
+          Statistiques
+        </Typography>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            color="gray"
+            variant={viewMode === 'semaine' ? 'filled' : 'outlined'}
+            onClick={() => setViewMode('semaine')}
+            className="normal-case"
+          >
+            Par semaine
+          </Button>
+          <Button
+            size="sm"
+            color="gray"
+            variant={viewMode === 'annee' ? 'filled' : 'outlined'}
+            onClick={() => setViewMode('annee')}
+            className="normal-case"
+          >
+            Par année
+          </Button>
         </div>
-      </header>
+      </div>
 
-      <nav className="bg-white shadow-sm mb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8 py-3">
-            <Link to="/dashboard" className="text-gray-600 hover:text-strava">
-              Tableau de bord
-            </Link>
-            <Link to="/stats" className="text-strava font-semibold border-b-2 border-strava pb-1">
-              Statistiques
-            </Link>
-            <Link to="/total" className="text-gray-600 hover:text-strava">
-              Total
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">
-          📊 Évolution des 8 dernières semaines
-        </h2>
-
-        {weeklyData.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">Pas assez de données. Continuez à vous entraîner!</p>
-          </div>
-        ) : (
-          <>
-            <div className="bg-white rounded-lg shadow p-6 mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">🚴 Distance par semaine (km)</h3>
+      {statsData.length === 0 ? (
+        <Card className="border border-gray-200 shadow-none">
+          <CardBody className="text-center py-12">
+            <Typography variant="h6" color="gray">
+              Pas assez de données
+            </Typography>
+          </CardBody>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          <Card className="border border-gray-200 shadow-none">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 p-6 border-b border-gray-200"
+            >
+              <Typography variant="h6" color="blue-gray">
+                Distance {viewMode === 'semaine' ? 'par semaine' : 'par année'} (km)
+              </Typography>
+            </CardHeader>
+            <CardBody>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="week" />
-                  <YAxis />
+                <BarChart data={statsData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="period" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="distance" fill="#FC4C02" name="Distance (km)" />
+                  <Bar dataKey="distance" fill="#374151" name="Distance (km)" />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </CardBody>
+          </Card>
 
-            <div className="bg-white rounded-lg shadow p-6 mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">🏆 Points par semaine</h3>
+          <Card className="border border-gray-200 shadow-none">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 p-6 border-b border-gray-200"
+            >
+              <Typography variant="h6" color="blue-gray">
+                Dénivelé {viewMode === 'semaine' ? 'par semaine' : 'par année'} (m)
+              </Typography>
+            </CardHeader>
+            <CardBody>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="week" />
-                  <YAxis />
+                <LineChart data={statsData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="period" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
                   <Tooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="points" stroke="#FC4C02" strokeWidth={3} name="Points" />
+                  <Line type="monotone" dataKey="elevation" stroke="#6b7280" strokeWidth={3} name="Dénivelé (m)" />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </CardBody>
+          </Card>
 
-            <div className="bg-white rounded-lg shadow p-6 mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">📈 Activités par semaine</h3>
+          <Card className="border border-gray-200 shadow-none">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 p-6 border-b border-gray-200"
+            >
+              <Typography variant="h6" color="blue-gray">
+                Nombre d'activités {viewMode === 'semaine' ? 'par semaine' : 'par année'}
+              </Typography>
+            </CardHeader>
+            <CardBody>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="week" />
-                  <YAxis />
+                <BarChart data={statsData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="period" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="activities" fill="#10B981" name="Activités" />
+                  <Bar dataKey="activities" fill="#9ca3af" name="Activités" />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">⛰️ Dénivelé par semaine (m)</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="week" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="elevation" stroke="#8B5CF6" strokeWidth={3} name="Dénivelé (m)" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </>
-        )}
-      </main>
-    </div>
+            </CardBody>
+          </Card>
+        </div>
+      )}
+    </Layout>
   );
 }

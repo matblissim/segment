@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { activitiesApi } from '../services/api';
-import { Link } from 'react-router-dom';
+import { useSportFilter } from '../contexts/SportFilterContext';
+import Layout from '../components/Layout';
+import {
+  Card,
+  CardBody,
+  Typography,
+  Chip,
+} from "@material-tailwind/react";
 
 export default function Activities() {
-  const { user, logout } = useAuth();
-  const [activities, setActivities] = useState([]);
+  const { sportFilter } = useSportFilter();
+  const [allActivities, setAllActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,8 +21,8 @@ export default function Activities() {
   const loadActivities = async () => {
     try {
       setLoading(true);
-      const data = await activitiesApi.getActivities(50);
-      setActivities(data.activities || data);
+      const data = await activitiesApi.getAllActivities();
+      setAllActivities(data.activities || data);
     } catch (error) {
       console.error('Error loading activities:', error);
     } finally {
@@ -41,147 +47,107 @@ export default function Activities() {
     return `${hours}h ${minutes}min`;
   };
 
-  const getActivityIcon = (type) => {
-    const icons = {
-      'Ride': '🚴',
-      'Run': '🏃',
-      'Swim': '🏊',
-      'Walk': '🚶',
-      'Hike': '🥾',
-      'default': '💪'
-    };
-    return icons[type] || icons.default;
-  };
+  // Filtrer les activités selon le sport
+  const RUNNING_TYPES = ['Run', 'TrailRun', 'VirtualRun', 'Trail'];
+  const CYCLING_TYPES = ['Ride', 'VirtualRide', 'EBikeRide'];
 
-  const calculatePoints = (activity) => {
-    let points = Math.floor((activity.distance / 1000) * 10);
-    if (activity.total_elevation_gain) {
-      points += Math.floor(activity.total_elevation_gain / 10);
-    }
-    return points;
-  };
+  const filteredActivities = sportFilter === 'running'
+    ? allActivities.filter(a => RUNNING_TYPES.includes(a.type))
+    : allActivities.filter(a => CYCLING_TYPES.includes(a.type));
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-strava mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement des activités...</p>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 mx-auto mb-4"></div>
+            <Typography variant="h6" color="gray">
+              Chargement des activités...
+            </Typography>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <img
-                src={user?.profile || 'https://via.placeholder.com/50'}
-                alt="Profile"
-                className="w-12 h-12 rounded-full"
-              />
-              <h1 className="text-2xl font-bold text-gray-900">
-                {user?.firstname} {user?.lastname}
-              </h1>
-            </div>
-            <button
-              onClick={logout}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
+    <Layout>
+      <Typography variant="h4" color="blue-gray" className="mb-6">
+        Activités
+      </Typography>
 
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm mb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8 py-3">
-            <Link to="/dashboard" className="text-gray-600 hover:text-strava">
-              Tableau de bord
-            </Link>
-            <Link to="/activities" className="text-strava font-semibold border-b-2 border-strava pb-1">
-              Activités
-            </Link>
-            <Link to="/badges" className="text-gray-600 hover:text-strava">
-              Badges
-            </Link>
-            <Link to="/challenges" className="text-gray-600 hover:text-strava">
-              Challenges
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Vos Activités</h2>
-
-        <div className="space-y-4">
-          {activities.map((activity) => (
-            <div key={activity.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+      <div className="space-y-4">
+        {filteredActivities.map((activity) => (
+          <Card key={activity.id} className="border border-gray-200 shadow-none hover:shadow-sm transition">
+            <CardBody>
               <div className="flex justify-between items-start">
-                <div className="flex items-start space-x-4 flex-1">
-                  <div className="text-4xl">{getActivityIcon(activity.type)}</div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Typography variant="h6" color="blue-gray">
                       {activity.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3">
-                      {formatDate(activity.start_date)}
-                    </p>
+                    </Typography>
+                    <Chip
+                      value={activity.type}
+                      size="sm"
+                      variant="ghost"
+                      color="gray"
+                      className="font-normal"
+                    />
+                  </div>
+                  <Typography variant="small" color="gray" className="mb-4">
+                    {formatDate(activity.start_date)}
+                  </Typography>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <p className="text-gray-600 text-sm">Distance</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {(Number(activity.distance || 0) / 1000).toFixed(2)} km
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600 text-sm">Durée</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {formatDuration(activity.moving_time)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600 text-sm">Dénivelé</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {Number(activity.total_elevation_gain || 0).toFixed(0)} m
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600 text-sm">Vitesse moy.</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {(Number(activity.distance || 0) / 1000 / (Number(activity.moving_time || 1) / 3600)).toFixed(1)} km/h
-                        </p>
-                      </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <Typography variant="small" color="gray" className="font-normal">
+                        Distance
+                      </Typography>
+                      <Typography variant="h6" color="blue-gray">
+                        {(Number(activity.distance || 0) / 1000).toFixed(2)} km
+                      </Typography>
+                    </div>
+                    <div>
+                      <Typography variant="small" color="gray" className="font-normal">
+                        Durée
+                      </Typography>
+                      <Typography variant="h6" color="blue-gray">
+                        {formatDuration(activity.moving_time)}
+                      </Typography>
+                    </div>
+                    <div>
+                      <Typography variant="small" color="gray" className="font-normal">
+                        Dénivelé
+                      </Typography>
+                      <Typography variant="h6" color="blue-gray">
+                        {Number(activity.total_elevation_gain || 0).toFixed(0)} m
+                      </Typography>
+                    </div>
+                    <div>
+                      <Typography variant="small" color="gray" className="font-normal">
+                        Vitesse moy.
+                      </Typography>
+                      <Typography variant="h6" color="blue-gray">
+                        {(Number(activity.distance || 0) / 1000 / (Number(activity.moving_time || 1) / 3600)).toFixed(1)} km/h
+                      </Typography>
                     </div>
                   </div>
                 </div>
-
-                <div className="text-right ml-4">
-                  <div className="bg-strava text-white px-4 py-2 rounded-lg">
-                    <p className="text-sm">Points gagnés</p>
-                    <p className="text-2xl font-bold">+{calculatePoints(activity)}</p>
-                  </div>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            </CardBody>
+          </Card>
+        ))}
+      </div>
 
-        {activities.length === 0 && (
-          <div className="bg-white rounded-lg shadow p-8 text-center">
-            <p className="text-gray-600">Aucune activité trouvée. Commencez à vous entraîner!</p>
-          </div>
-        )}
-      </main>
-    </div>
+      {filteredActivities.length === 0 && (
+        <Card className="border border-gray-200 shadow-none">
+          <CardBody className="text-center py-12">
+            <Typography variant="h6" color="gray">
+              Aucune activité trouvée
+            </Typography>
+          </CardBody>
+        </Card>
+      )}
+    </Layout>
   );
 }
