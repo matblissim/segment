@@ -64,6 +64,7 @@ router.post('/strava/callback', async (req, res) => {
         profile_photo: user.profile_photo,
         sync_status: user.sync_status,
         last_sync_at: user.last_sync_at,
+        role: user.role || 'user',
       },
       syncJobId,
       isNewUser,
@@ -103,6 +104,7 @@ router.get('/me', async (req, res) => {
       profile_photo: user.profile_photo,
       sync_status: user.sync_status,
       last_sync_at: user.last_sync_at,
+      role: user.role || 'user',
     });
   } catch (error) {
     console.error('❌ Get user error:', error);
