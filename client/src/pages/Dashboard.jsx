@@ -16,9 +16,6 @@ import {
 import {
   ArrowPathIcon,
   ArrowRightOnRectangleIcon,
-  TrophyIcon,
-  MapIcon,
-  FireIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/solid";
 
@@ -26,12 +23,15 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
-  const [badges, setBadges] = useState([]);
+  const [allBadges, setAllBadges] = useState([]);
+  const [runningBadges, setRunningBadges] = useState([]);
+  const [cyclingBadges, setCyclingBadges] = useState([]);
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncInfo, setSyncInfo] = useState(null);
   const [expandedBadge, setExpandedBadge] = useState(null);
+  const [sportFilter, setSportFilter] = useState('running'); // 'running' ou 'cycling'
 
   useEffect(() => {
     loadData();
@@ -46,7 +46,9 @@ export default function Dashboard() {
 
       const gamificationData = await gamificationApi.calculateStats(activitiesData.activities || activitiesData);
       setStats(gamificationData.stats);
-      setBadges(gamificationData.badges);
+      setAllBadges(gamificationData.badges || []);
+      setRunningBadges(gamificationData.runningBadges || []);
+      setCyclingBadges(gamificationData.cyclingBadges || []);
       setChallenges(gamificationData.challenges);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -88,19 +90,21 @@ export default function Dashboard() {
   const getSyncChipColor = () => {
     if (!syncInfo) return "gray";
     const colors = {
-      syncing: "blue",
-      completed: "green",
-      failed: "red",
-      pending: "amber",
+      syncing: "blue-gray",
+      completed: "gray",
+      failed: "gray",
+      pending: "gray",
     };
     return colors[syncInfo.syncStatus] || "gray";
   };
+
+  const badges = sportFilter === 'running' ? runningBadges : cyclingBadges;
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 mx-auto mb-4"></div>
           <Typography variant="h6" color="gray">
             Chargement...
           </Typography>
@@ -112,7 +116,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-deep-orange-600 pb-32">
+      <div className="bg-white border-b border-gray-200">
         <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4">
@@ -120,14 +124,14 @@ export default function Dashboard() {
                 src={user?.profile || 'https://via.placeholder.com/150'}
                 alt={user?.firstname}
                 size="md"
-                className="ring-2 ring-white"
+                className="ring-2 ring-gray-200"
               />
               <div>
-                <Typography variant="h6" color="white">
+                <Typography variant="h6" color="blue-gray">
                   {user?.firstname} {user?.lastname}
                 </Typography>
-                <Typography variant="small" color="white" className="opacity-80">
-                  {syncInfo?.activityCount || 0} activités • {stats?.totalPoints || 0} points
+                <Typography variant="small" color="gray" className="font-normal">
+                  {syncInfo?.activityCount || 0} activités
                 </Typography>
               </div>
             </div>
@@ -136,12 +140,13 @@ export default function Dashboard() {
                 <Chip
                   value={syncInfo.syncStatus === 'syncing' ? 'Sync...' : 'Sync OK'}
                   color={getSyncChipColor()}
+                  variant="ghost"
                   className="capitalize"
                 />
               )}
               <Button
                 size="sm"
-                color="white"
+                color="gray"
                 variant="text"
                 className="flex items-center gap-2"
                 onClick={handleSync}
@@ -152,7 +157,7 @@ export default function Dashboard() {
               </Button>
               <IconButton
                 size="sm"
-                color="white"
+                color="gray"
                 variant="text"
                 onClick={logout}
               >
@@ -163,115 +168,139 @@ export default function Dashboard() {
         </nav>
 
         {/* Navigation Tabs */}
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
-          <div className="flex gap-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 border-t border-gray-200">
+          <div className="flex gap-1">
             <Link to="/dashboard">
-              <Button color="white" size="sm">Tableau de bord</Button>
+              <Button color="gray" variant="text" size="sm" className="rounded-none border-b-2 border-gray-900">
+                Tableau de bord
+              </Button>
             </Link>
             <Link to="/activities">
-              <Button color="white" variant="text" size="sm">Activités</Button>
+              <Button color="gray" variant="text" size="sm" className="rounded-none">
+                Activités
+              </Button>
             </Link>
             <Link to="/badges">
-              <Button color="white" variant="text" size="sm">Badges</Button>
+              <Button color="gray" variant="text" size="sm" className="rounded-none">
+                Badges
+              </Button>
             </Link>
             <Link to="/challenges">
-              <Button color="white" variant="text" size="sm">Challenges</Button>
+              <Button color="gray" variant="text" size="sm" className="rounded-none">
+                Challenges
+              </Button>
             </Link>
             <Link to="/stats">
-              <Button color="white" variant="text" size="sm">Statistiques</Button>
+              <Button color="gray" variant="text" size="sm" className="rounded-none">
+                Statistiques
+              </Button>
             </Link>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-24 pb-12">
-        {/* Welcome Message */}
-        {syncInfo && syncInfo.activityCount === 0 && (
-          <Card className="mb-6 border border-blue-gray-100 shadow-sm bg-gradient-to-r from-blue-500 to-blue-600">
-            <CardBody className="flex items-center gap-4 text-white">
-              <FireIcon className="h-12 w-12" />
-              <div>
-                <Typography variant="h5" color="white" className="mb-1">
-                  Bienvenue! 🚀
-                </Typography>
-                <Typography color="white" className="opacity-90">
-                  Cliquez sur "Sync" pour récupérer vos activités Strava!
-                </Typography>
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {/* Sport Toggle */}
+        <Card className="mb-6 border border-gray-200 shadow-none">
+          <CardBody className="p-4">
+            <div className="flex items-center justify-between">
+              <Typography variant="small" color="blue-gray" className="font-medium">
+                Type de sport
+              </Typography>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  color="gray"
+                  variant={sportFilter === 'running' ? 'filled' : 'outlined'}
+                  onClick={() => setSportFilter('running')}
+                  className="normal-case"
+                >
+                  Course à pied
+                </Button>
+                <Button
+                  size="sm"
+                  color="gray"
+                  variant={sportFilter === 'cycling' ? 'filled' : 'outlined'}
+                  onClick={() => setSportFilter('cycling')}
+                  className="normal-case"
+                >
+                  Vélo
+                </Button>
               </div>
-            </CardBody>
-          </Card>
-        )}
+            </div>
+          </CardBody>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-          <Card className="border border-blue-gray-100 shadow-sm">
+          <Card className="border border-gray-200 shadow-none">
             <CardBody>
               <div className="flex items-center justify-between">
                 <div>
-                  <Typography variant="small" className="font-normal text-blue-gray-600">
-                    Points Total
-                  </Typography>
-                  <Typography variant="h4" color="blue-gray">
-                    {stats?.totalPoints || 0}
-                  </Typography>
-                </div>
-                <div className="rounded-full bg-gradient-to-tr from-orange-600 to-orange-400 p-3">
-                  <TrophyIcon className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="border border-blue-gray-100 shadow-sm">
-            <CardBody>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Typography variant="small" className="font-normal text-blue-gray-600">
+                  <Typography variant="small" className="font-normal text-gray-600">
                     Distance
                   </Typography>
                   <Typography variant="h4" color="blue-gray">
                     {(Number(stats?.totalDistance || 0) / 1000).toFixed(0)} km
                   </Typography>
                 </div>
-                <div className="rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 p-3">
-                  <MapIcon className="h-6 w-6 text-white" />
+                <div className="rounded-full bg-gray-100 p-3">
+                  <ChartBarIcon className="h-6 w-6 text-gray-700" />
                 </div>
               </div>
             </CardBody>
           </Card>
 
-          <Card className="border border-blue-gray-100 shadow-sm">
+          <Card className="border border-gray-200 shadow-none">
             <CardBody>
               <div className="flex items-center justify-between">
                 <div>
-                  <Typography variant="small" className="font-normal text-blue-gray-600">
-                    Badges
-                  </Typography>
-                  <Typography variant="h4" color="blue-gray">
-                    {badges.length}
-                  </Typography>
-                </div>
-                <div className="rounded-full bg-gradient-to-tr from-pink-600 to-pink-400 p-3">
-                  <FireIcon className="h-6 w-6 text-white" />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="border border-blue-gray-100 shadow-sm">
-            <CardBody>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Typography variant="small" className="font-normal text-blue-gray-600">
+                  <Typography variant="small" className="font-normal text-gray-600">
                     Dénivelé
                   </Typography>
                   <Typography variant="h4" color="blue-gray">
                     {Number(stats?.totalElevation || 0).toFixed(0)} m
                   </Typography>
                 </div>
-                <div className="rounded-full bg-gradient-to-tr from-green-600 to-green-400 p-3">
-                  <ChartBarIcon className="h-6 w-6 text-white" />
+                <div className="rounded-full bg-gray-100 p-3">
+                  <ChartBarIcon className="h-6 w-6 text-gray-700" />
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="border border-gray-200 shadow-none">
+            <CardBody>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Typography variant="small" className="font-normal text-gray-600">
+                    Badges
+                  </Typography>
+                  <Typography variant="h4" color="blue-gray">
+                    {badges.filter(b => b.earned).length}
+                  </Typography>
+                </div>
+                <div className="rounded-full bg-gray-100 p-3">
+                  <ChartBarIcon className="h-6 w-6 text-gray-700" />
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          <Card className="border border-gray-200 shadow-none">
+            <CardBody>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Typography variant="small" className="font-normal text-gray-600">
+                    Activités
+                  </Typography>
+                  <Typography variant="h4" color="blue-gray">
+                    {syncInfo?.activityCount || 0}
+                  </Typography>
+                </div>
+                <div className="rounded-full bg-gray-100 p-3">
+                  <ChartBarIcon className="h-6 w-6 text-gray-700" />
                 </div>
               </div>
             </CardBody>
@@ -279,31 +308,30 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Recent Badges */}
-          <Card className="border border-blue-gray-100 shadow-sm">
+          {/* Badges */}
+          <Card className="border border-gray-200 shadow-none">
             <CardHeader
               floated={false}
               shadow={false}
               color="transparent"
-              className="m-0 p-6"
+              className="m-0 p-6 border-b border-gray-200"
             >
               <Typography variant="h6" color="blue-gray">
-                Badges Récents 🎖️
+                Badges {sportFilter === 'running' ? 'Course à pied' : 'Vélo'}
               </Typography>
             </CardHeader>
-            <CardBody className="pt-0">
+            <CardBody className="pt-4">
               {badges.filter(b => b.earned).length > 0 ? (
                 <div className="space-y-3">
                   {badges.filter(b => b.earned).map((badge) => (
                     <div key={badge.id} className="space-y-2">
                       <div
-                        className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 cursor-pointer hover:shadow-md transition-shadow"
+                        className="flex items-center justify-between p-4 rounded border border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors"
                         onClick={() => setExpandedBadge(expandedBadge === badge.id ? null : badge.id)}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="text-3xl">{badge.icon}</div>
                           <div>
-                            <Typography variant="small" color="blue-gray" className="font-bold">
+                            <Typography variant="small" color="blue-gray" className="font-semibold">
                               {badge.name}
                             </Typography>
                             <Typography variant="small" color="gray" className="font-normal">
@@ -314,20 +342,21 @@ export default function Dashboard() {
                         <div className="flex items-center gap-2">
                           <Chip
                             value={`×${badge.count}`}
-                            size="lg"
-                            className="bg-gradient-to-r from-orange-500 to-deep-orange-600 text-white font-bold"
+                            size="sm"
+                            variant="ghost"
+                            className="bg-gray-100 text-gray-900 font-semibold"
                           />
                         </div>
                       </div>
 
                       {expandedBadge === badge.id && badge.activities && badge.activities.length > 0 && (
-                        <div className="ml-4 p-3 bg-white rounded-lg border border-gray-200">
-                          <Typography variant="small" color="blue-gray" className="font-semibold mb-2">
-                            Activités ({badge.activities.length}):
+                        <div className="ml-4 p-3 bg-gray-50 rounded border border-gray-200">
+                          <Typography variant="small" color="blue-gray" className="font-medium mb-2">
+                            Activités ({badge.activities.length})
                           </Typography>
                           <div className="space-y-1 max-h-60 overflow-y-auto">
                             {badge.activities.map((activity) => (
-                              <div key={activity.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                              <div key={activity.id} className="flex justify-between items-center p-2 hover:bg-white rounded">
                                 <div className="flex-1">
                                   <Typography variant="small" color="blue-gray">
                                     {activity.name || `${activity.type} - ${new Date(activity.start_date).toLocaleDateString()}`}
@@ -340,13 +369,13 @@ export default function Dashboard() {
                                       <>
                                         <span className="text-gray-400">•</span>
                                         <Typography variant="small" color="gray">
-                                          📍 {activity.city}
+                                          {activity.city}
                                         </Typography>
                                       </>
                                     )}
                                   </div>
                                 </div>
-                                <Typography variant="small" color="blue-gray" className="font-semibold">
+                                <Typography variant="small" color="blue-gray" className="font-medium">
                                   {(activity.distance / 1000).toFixed(1)} km
                                 </Typography>
                               </div>
@@ -359,48 +388,45 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <Typography variant="small" color="gray" className="text-center py-8">
-                  Aucun badge pour le moment. Continuez à vous entraîner!
+                  Aucun badge pour le moment
                 </Typography>
               )}
             </CardBody>
           </Card>
 
           {/* Challenges */}
-          <Card className="border border-blue-gray-100 shadow-sm">
+          <Card className="border border-gray-200 shadow-none">
             <CardHeader
               floated={false}
               shadow={false}
               color="transparent"
-              className="m-0 p-6"
+              className="m-0 p-6 border-b border-gray-200"
             >
               <Typography variant="h6" color="blue-gray">
-                Challenges Actifs 🎯
+                Challenges
               </Typography>
             </CardHeader>
-            <CardBody className="pt-0">
+            <CardBody className="pt-4">
               {challenges.length > 0 ? (
                 <div className="space-y-4">
                   {challenges.slice(0, 3).map((challenge) => (
                     <div key={challenge.id}>
                       <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{challenge.icon}</span>
-                          <div>
-                            <Typography variant="small" color="blue-gray" className="font-bold">
-                              {challenge.name}
-                            </Typography>
-                            <Typography variant="small" color="gray">
-                              +{challenge.reward} points
-                            </Typography>
-                          </div>
+                        <div>
+                          <Typography variant="small" color="blue-gray" className="font-semibold">
+                            {challenge.name}
+                          </Typography>
+                          <Typography variant="small" color="gray">
+                            +{challenge.reward} points
+                          </Typography>
                         </div>
-                        <Typography variant="small" color="blue-gray" className="font-bold">
+                        <Typography variant="small" color="blue-gray" className="font-semibold">
                           {Number(challenge.progress || 0).toFixed(0)}%
                         </Typography>
                       </div>
                       <Progress
                         value={Math.min(challenge.progress || 0, 100)}
-                        color="orange"
+                        color="gray"
                         className="h-2"
                       />
                     </div>

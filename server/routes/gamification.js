@@ -33,13 +33,24 @@ const calculatePoints = (activity) => {
 
 // Types d'activités de course à pied acceptés
 const RUNNING_TYPES = ['Run', 'TrailRun', 'VirtualRun', 'Trail'];
+const CYCLING_TYPES = ['Ride', 'VirtualRide', 'EBikeRide'];
 
-// Définition des badges (basés sur comptage d'activités de course à pied uniquement)
-const DISTANCE_BADGES = [
-  { id: 'semi_marathon', name: 'Semi-Marathon', description: 'Course à pied/Trail de 21.1 km ou plus', icon: '🏃', threshold: 21100, excludeAbove: 42200 },
-  { id: 'marathon', name: 'Marathon', description: 'Course à pied/Trail de 42.2 km ou plus', icon: '🏅', threshold: 42200, excludeAbove: 100000 },
-  { id: 'ultra_100k', name: '100 KM', description: 'Course à pied/Trail de 100 km ou plus', icon: '💯', threshold: 100000, excludeAbove: null },
-  { id: 'week_100k', name: 'Semaine 100K+', description: 'Semaines avec 100+ km de course à pied', icon: '📅', threshold: 100000, weekly: true },
+// Définition des badges Course à pied
+const RUNNING_BADGES = [
+  { id: 'semi_marathon', name: 'Semi-Marathon', description: 'Course de 21.1 km ou plus', sportType: 'running', threshold: 21100, excludeAbove: 42200 },
+  { id: 'marathon', name: 'Marathon', description: 'Course de 42.2 km ou plus', sportType: 'running', threshold: 42200, excludeAbove: 100000 },
+  { id: 'ultra_100k', name: '100 KM', description: 'Course de 100 km ou plus', sportType: 'running', threshold: 100000, excludeAbove: null },
+  { id: 'week_100k', name: 'Semaine 100K+', description: 'Semaine avec 100+ km', sportType: 'running', threshold: 100000, weekly: true, metric: 'distance' },
+  { id: 'week_150k', name: 'Semaine 150K+', description: 'Semaine avec 150+ km', sportType: 'running', threshold: 150000, weekly: true, metric: 'distance' },
+  { id: 'week_200k', name: 'Semaine 200K+', description: 'Semaine avec 200+ km', sportType: 'running', threshold: 200000, weekly: true, metric: 'distance' },
+  { id: 'week_5kd', name: 'Semaine 5000D+', description: 'Semaine avec 5000m de dénivelé', sportType: 'running', threshold: 5000, weekly: true, metric: 'elevation' },
+  { id: 'week_10kd', name: 'Semaine 10000D+', description: 'Semaine avec 10000m de dénivelé', sportType: 'running', threshold: 10000, weekly: true, metric: 'elevation' },
+];
+
+// Définition des badges Vélo
+const CYCLING_BADGES = [
+  { id: 'ride_100k', name: 'Sortie 100K', description: 'Sortie vélo de 100 km ou plus', sportType: 'cycling', threshold: 100000, excludeAbove: 160000 },
+  { id: 'ride_160k', name: 'Sortie 160K+', description: 'Sortie vélo de 160 km ou plus', sportType: 'cycling', threshold: 160000, excludeAbove: null },
 ];
 
 // Définition des challenges
@@ -125,70 +136,79 @@ router.post('/calculate-stats', (req, res) => {
     }
   }
 
-  // Filtrer uniquement les activités de course à pied
-  const runningActivities = activities.filter(a => RUNNING_TYPES.includes(a.type));
+  // Fonction générique pour calculer les badges
+  const calculateBadges = (badgeList, activityTypes) => {
+    const filteredActivities = activities.filter(a => activityTypes.includes(a.type));
 
-  // Calculer les badges de distance (avec comptage et liste des activités)
-  const distanceBadges = DISTANCE_BADGES.map(badge => {
-    let matchingActivities = [];
-    let count = 0;
+    return badgeList.map(badge => {
+      let matchingActivities = [];
+      let count = 0;
 
-    if (badge.weekly) {
-      // Badge hebdomadaire: grouper par semaine (lundi-dimanche)
-      const weekGroups = {};
+      if (badge.weekly) {
+        // Badge hebdomadaire: grouper par semaine (lundi-dimanche)
+        const weekGroups = {};
 
-      runningActivities.forEach(activity => {
-        const date = new Date(activity.start_date);
-        // Calculer le lundi de la semaine
-        const day = date.getDay();
-        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-        const monday = new Date(date.setDate(diff));
-        const weekKey = monday.toISOString().split('T')[0];
+        filteredActivities.forEach(activity => {
+          const date = new Date(activity.start_date);
+          // Calculer le lundi de la semaine
+          const day = date.getDay();
+          const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+          const monday = new Date(date.setDate(diff));
+          const weekKey = monday.toISOString().split('T')[0];
 
-        if (!weekGroups[weekKey]) {
-          weekGroups[weekKey] = { distance: 0, activities: [], weekStart: weekKey };
-        }
-        weekGroups[weekKey].distance += activity.distance || 0;
-        weekGroups[weekKey].activities.push(activity);
-      });
+          if (!weekGroups[weekKey]) {
+            weekGroups[weekKey] = { distance: 0, elevation: 0, activities: [], weekStart: weekKey };
+          }
+          weekGroups[weekKey].distance += activity.distance || 0;
+          weekGroups[weekKey].elevation += activity.total_elevation_gain || 0;
+          weekGroups[weekKey].activities.push(activity);
+        });
 
-      // Filtrer les semaines >= 100km
-      matchingActivities = Object.values(weekGroups)
-        .filter(week => week.distance >= badge.threshold)
-        .flatMap(week => week.activities);
+        // Filtrer les semaines selon la métrique (distance ou dénivelé)
+        const metric = badge.metric || 'distance';
+        matchingActivities = Object.values(weekGroups)
+          .filter(week => week[metric] >= badge.threshold)
+          .flatMap(week => week.activities);
 
-      count = Object.values(weekGroups).filter(week => week.distance >= badge.threshold).length;
-    } else {
-      // Badge par activité individuelle
-      matchingActivities = runningActivities.filter(activity => {
-        const distance = activity.distance || 0;
+        count = Object.values(weekGroups).filter(week => week[metric] >= badge.threshold).length;
+      } else {
+        // Badge par activité individuelle
+        matchingActivities = filteredActivities.filter(activity => {
+          const distance = activity.distance || 0;
 
-        // Vérifier si l'activité est dans la plage de ce badge
-        if (distance < badge.threshold) return false;
+          // Vérifier si l'activité est dans la plage de ce badge
+          if (distance < badge.threshold) return false;
 
-        // Exclure si au-dessus du seuil supérieur (éviter le double comptage)
-        if (badge.excludeAbove && distance >= badge.excludeAbove) return false;
+          // Exclure si au-dessus du seuil supérieur (éviter le double comptage)
+          if (badge.excludeAbove && distance >= badge.excludeAbove) return false;
 
-        return true;
-      });
+          return true;
+        });
 
-      count = matchingActivities.length;
-    }
+        count = matchingActivities.length;
+      }
 
-    return {
-      ...badge,
-      count,
-      earned: count > 0,
-      activities: matchingActivities.map(a => ({
-        id: a.id,
-        name: a.name,
-        distance: a.distance,
-        start_date: a.start_date,
-        type: a.type,
-        city: a.start_city || a.location_city || a.timezone?.split('/')[1] || 'Non spécifiée'
-      }))
-    };
-  });
+      return {
+        ...badge,
+        count,
+        earned: count > 0,
+        activities: matchingActivities.map(a => ({
+          id: a.id,
+          name: a.name,
+          distance: a.distance,
+          elevation: a.total_elevation_gain,
+          start_date: a.start_date,
+          type: a.type,
+          city: a.start_city || a.location_city || a.timezone?.split('/')[1] || 'Non spécifiée'
+        }))
+      };
+    });
+  };
+
+  // Calculer les badges pour chaque type de sport
+  const runningBadges = calculateBadges(RUNNING_BADGES, RUNNING_TYPES);
+  const cyclingBadges = calculateBadges(CYCLING_BADGES, CYCLING_TYPES);
+  const allBadges = [...runningBadges, ...cyclingBadges];
 
   // Calculer la progression des challenges
   const challengeProgress = CHALLENGES.map(challenge => {
@@ -224,16 +244,22 @@ router.post('/calculate-stats', (req, res) => {
 
   res.json({
     stats,
-    badges: distanceBadges,
+    badges: allBadges,
+    runningBadges,
+    cyclingBadges,
     challenges: challengeProgress,
-    totalBadges: distanceBadges.filter(b => b.earned).length,
+    totalBadges: allBadges.filter(b => b.earned).length,
     totalChallengesCompleted: challengeProgress.filter(c => c.completed).length
   });
 });
 
 // Obtenir tous les badges disponibles
 router.get('/badges', (req, res) => {
-  res.json(DISTANCE_BADGES);
+  res.json({
+    running: RUNNING_BADGES,
+    cycling: CYCLING_BADGES,
+    all: [...RUNNING_BADGES, ...CYCLING_BADGES]
+  });
 });
 
 // Obtenir tous les challenges disponibles
