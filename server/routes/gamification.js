@@ -184,8 +184,9 @@ router.post('/calculate-stats', (req, res) => {
           if (!weekGroups[weekKey]) {
             weekGroups[weekKey] = { distance: 0, elevation: 0, activities: [], weekStart: weekKey };
           }
-          weekGroups[weekKey].distance += activity.distance || 0;
-          weekGroups[weekKey].elevation += activity.total_elevation_gain || 0;
+          // Forcer la conversion en nombre pour éviter NaN
+          weekGroups[weekKey].distance += Number(activity.distance) || 0;
+          weekGroups[weekKey].elevation += Number(activity.total_elevation_gain) || 0;
           weekGroups[weekKey].activities.push(activity);
         });
 
