@@ -1,6 +1,7 @@
 import express from 'express';
 import User from '../models/User.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
+import { geocodeUserActivities } from '../services/geocoding.js';
 
 const router = express.Router();
 
@@ -58,6 +59,26 @@ router.get('/users/:id', async (req, res) => {
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+// POST /api/admin/geocode/:userId - Géocoder les activités d'un utilisateur
+router.post('/geocode/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { limit = 100 } = req.body;
+
+    console.log(`🚀 Démarrage géocodage pour user ${userId}...`);
+
+    const result = await geocodeUserActivities(parseInt(userId), parseInt(limit));
+
+    res.json({
+      message: 'Géocodage terminé',
+      ...result
+    });
+  } catch (error) {
+    console.error('Error geocoding activities:', error);
+    res.status(500).json({ error: 'Failed to geocode activities' });
   }
 });
 

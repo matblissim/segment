@@ -237,14 +237,14 @@ router.post('/calculate-stats', (req, res) => {
         count,
         earned: count > 0,
         activities: matchingActivities.map(a => {
-          // Extraire la ville du timezone si disponible
-          let city = null;
-          if (a.raw_data) {
-            const rawData = typeof a.raw_data === 'string' ? JSON.parse(a.raw_data) : a.raw_data;
-            city = rawData.location_city || rawData.start_city;
+          // Utiliser le champ city géocodé si disponible, sinon fallback sur timezone
+          let city = a.city; // Champ géocodé de la DB
 
-            // Si pas de ville, extraire du timezone
-            if (!city && rawData.timezone) {
+          if (!city && a.raw_data) {
+            const rawData = typeof a.raw_data === 'string' ? JSON.parse(a.raw_data) : a.raw_data;
+
+            // Fallback: extraire du timezone
+            if (rawData.timezone) {
               // Format: "(GMT+01:00) Europe/Paris" → "Paris"
               const tzMatch = rawData.timezone.match(/\/([^/]+)$/);
               if (tzMatch) {
