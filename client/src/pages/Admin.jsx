@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { adminApi } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
@@ -10,6 +11,7 @@ import {
   Button,
   Chip,
 } from "@material-tailwind/react";
+import { EyeIcon } from "@heroicons/react/24/outline";
 
 export default function Admin() {
   const { user: currentUser } = useAuth();
@@ -187,16 +189,9 @@ export default function Admin() {
                           </div>
                         </td>
                         <td className="p-4">
-                          <a
-                            href={`https://www.strava.com/athletes/${user.strava_id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                          >
-                            <Typography variant="small" color="blue">
-                              {user.strava_id}
-                            </Typography>
-                          </a>
+                          <Typography variant="small" color="gray">
+                            {user.strava_id}
+                          </Typography>
                         </td>
                         <td className="p-4">
                           <Typography variant="small" color="gray">
@@ -223,32 +218,45 @@ export default function Admin() {
                           />
                         </td>
                         <td className="p-4">
-                          {user.id !== currentUser.id && (
-                            <Button
-                              size="sm"
-                              color="gray"
-                              variant="outlined"
-                              onClick={() =>
-                                handleRoleChange(
-                                  user.id,
-                                  user.role === 'admin' ? 'user' : 'admin'
-                                )
-                              }
-                              disabled={updating === user.id}
-                              className="normal-case"
-                            >
-                              {updating === user.id
-                                ? 'Mise à jour...'
-                                : user.role === 'admin'
-                                ? 'Rétrograder'
-                                : 'Promouvoir admin'}
-                            </Button>
-                          )}
-                          {user.id === currentUser.id && (
-                            <Typography variant="small" color="gray">
-                              Vous
-                            </Typography>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <Link to={`/admin/user/${user.id}`}>
+                              <Button
+                                size="sm"
+                                color="gray"
+                                variant="text"
+                                className="flex items-center gap-1 normal-case"
+                              >
+                                <EyeIcon className="h-4 w-4" />
+                                Voir
+                              </Button>
+                            </Link>
+                            {user.id !== currentUser.id && (
+                              <Button
+                                size="sm"
+                                color="gray"
+                                variant="outlined"
+                                onClick={() =>
+                                  handleRoleChange(
+                                    user.id,
+                                    user.role === 'admin' ? 'user' : 'admin'
+                                  )
+                                }
+                                disabled={updating === user.id}
+                                className="normal-case"
+                              >
+                                {updating === user.id
+                                  ? 'Mise à jour...'
+                                  : user.role === 'admin'
+                                  ? 'Rétrograder'
+                                  : 'Promouvoir admin'}
+                              </Button>
+                            )}
+                            {user.id === currentUser.id && (
+                              <Typography variant="small" color="gray">
+                                (Vous)
+                              </Typography>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

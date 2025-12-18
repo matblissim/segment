@@ -183,6 +183,13 @@ export const adminApi = {
     return response.data;
   },
 
+  getUser: async (userId) => {
+    const response = await axios.get(`${API_BASE_URL}/admin/users/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
   updateUserRole: async (userId, role) => {
     const response = await axios.put(
       `${API_BASE_URL}/admin/users/${userId}/role`,

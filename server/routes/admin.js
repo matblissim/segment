@@ -44,4 +44,21 @@ router.put('/users/:id/role', async (req, res) => {
   }
 });
 
+// GET /api/admin/users/:id - Récupérer les détails d'un utilisateur spécifique
+router.get('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
 export default router;
