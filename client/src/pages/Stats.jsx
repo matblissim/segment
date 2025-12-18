@@ -16,6 +16,8 @@ export default function Stats() {
   const [allActivities, setAllActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('semaine'); // 'semaine' ou 'annee'
+  const [weekOffset, setWeekOffset] = useState(0); // Offset pour naviguer dans le temps
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     loadActivities();
@@ -41,7 +43,7 @@ export default function Stats() {
     ? allActivities.filter(a => RUNNING_TYPES.includes(a.type))
     : allActivities.filter(a => CYCLING_TYPES.includes(a.type));
 
-  // Calculer les stats hebdomadaires pour les 8 dernières semaines
+  // Calculer les stats hebdomadaires avec pagination
   const getWeeklyStats = () => {
     const weekGroups = {};
 
@@ -49,7 +51,8 @@ export default function Stats() {
       const date = new Date(activity.start_date);
       const day = date.getDay();
       const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-      const monday = new Date(date.setDate(diff));
+      const monday = new Date(date);
+      monday.setDate(diff);
       const weekKey = monday.toISOString().split('T')[0];
 
       if (!weekGroups[weekKey]) {
@@ -66,19 +69,34 @@ export default function Stats() {
       weekGroups[weekKey].activities += 1;
     });
 
-    // Trier et prendre les 8 dernières semaines
+    // Trier et paginer
     const sortedWeeks = Object.values(weekGroups)
       .sort((a, b) => new Date(b.week) - new Date(a.week))
-      .slice(0, 8)
+      .slice(weekOffset * 12, (weekOffset + 1) * 12)
       .reverse();
 
     // Formater les données
     return sortedWeeks.map(week => ({
-      period: formatWeek(new Date(week.week)),
+      period: formatWeekWithYear(new Date(week.week)),
       distance: Math.round(week.distance * 10) / 10,
       elevation: Math.round(week.elevation),
       activities: week.activities
     }));
+  };
+
+  // Calculer le nombre total de semaines
+  const getTotalWeeks = () => {
+    const weekGroups = {};
+    filteredActivities.forEach(activity => {
+      const date = new Date(activity.start_date);
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(date);
+      monday.setDate(diff);
+      const weekKey = monday.toISOString().split('T')[0];
+      weekGroups[weekKey] = true;
+    });
+    return Object.keys(weekGroups).length;
   };
 
   // Calculer les stats annuelles
@@ -114,10 +132,20 @@ export default function Stats() {
       }));
   };
 
-  const formatWeek = (date) => {
+  // Obtenir les années disponibles
+  const getAvailableYears = () => {
+    const years = new Set();
+    filteredActivities.forEach(activity => {
+      years.add(new Date(activity.start_date).getFullYear());
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  };
+
+  const formatWeekWithYear = (date) => {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    return `${day}/${month}`;
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   if (loading) {
@@ -136,6 +164,9 @@ export default function Stats() {
   };
 
   const statsData = viewMode === 'semaine' ? getWeeklyStats() : getYearlyStats();
+  const totalWeeks = getTotalWeeks();
+  const maxWeekOffset = Math.max(0, Math.ceil(totalWeeks / 12) - 1);
+  const availableYears = getAvailableYears();
 
   return (
     <Layout>
@@ -148,7 +179,10 @@ export default function Stats() {
             size="sm"
             color="gray"
             variant={viewMode === 'semaine' ? 'filled' : 'outlined'}
-            onClick={() => setViewMode('semaine')}
+            onClick={() => {
+              setViewMode('semaine');
+              setWeekOffset(0);
+            }}
             className="normal-case"
           >
             Par semaine
@@ -164,6 +198,35 @@ export default function Stats() {
           </Button>
         </div>
       </div>
+
+      {/* Navigation temporelle */}
+      {viewMode === 'semaine' && totalWeeks > 12 && (
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <Button
+            size="sm"
+            color="gray"
+            variant="outlined"
+            onClick={() => setWeekOffset(Math.min(weekOffset + 1, maxWeekOffset))}
+            disabled={weekOffset >= maxWeekOffset}
+            className="normal-case"
+          >
+            ← Plus ancien
+          </Button>
+          <Typography variant="small" color="gray">
+            Semaines {weekOffset * 12 + 1} - {Math.min((weekOffset + 1) * 12, totalWeeks)} sur {totalWeeks}
+          </Typography>
+          <Button
+            size="sm"
+            color="gray"
+            variant="outlined"
+            onClick={() => setWeekOffset(Math.max(weekOffset - 1, 0))}
+            disabled={weekOffset === 0}
+            className="normal-case"
+          >
+            Plus récent →
+          </Button>
+        </div>
+      )}
 
       {statsData.length === 0 ? (
         <Card className="border border-gray-200 shadow-none">
