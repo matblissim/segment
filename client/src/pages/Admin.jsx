@@ -187,9 +187,16 @@ export default function Admin() {
                           </div>
                         </td>
                         <td className="p-4">
-                          <Typography variant="small" color="gray">
-                            {user.strava_id}
-                          </Typography>
+                          <a
+                            href={`https://www.strava.com/athletes/${user.strava_id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            <Typography variant="small" color="blue">
+                              {user.strava_id}
+                            </Typography>
+                          </a>
                         </td>
                         <td className="p-4">
                           <Typography variant="small" color="gray">
