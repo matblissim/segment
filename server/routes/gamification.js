@@ -165,6 +165,17 @@ router.post('/calculate-stats', (req, res) => {
           weekGroups[weekKey].activities.push(activity);
         });
 
+        // Debug pour badge Semaine 100K+
+        if (badge.id === 'week_100k') {
+          console.log('\n🔍 DEBUG Badge Semaine 100K+:');
+          console.log('Total activités running filtrées:', filteredActivities.length);
+          console.log('Semaines avec distances:');
+          Object.values(weekGroups).forEach(week => {
+            const distKm = Math.round(week.distance / 1000 * 10) / 10;
+            console.log(`  ${week.weekStart}: ${distKm} km (${week.activities.length} activités)`);
+          });
+        }
+
         // Filtrer les semaines selon la métrique (distance ou dénivelé)
         const metric = badge.metric || 'distance';
         matchingActivities = Object.values(weekGroups)
@@ -172,6 +183,13 @@ router.post('/calculate-stats', (req, res) => {
           .flatMap(week => week.activities);
 
         count = Object.values(weekGroups).filter(week => week[metric] >= badge.threshold).length;
+
+        // Debug pour badge Semaine 100K+
+        if (badge.id === 'week_100k') {
+          console.log('Seuil (threshold):', badge.threshold, 'mètres');
+          console.log('Semaines qualifiantes:', count);
+          console.log('');
+        }
       } else {
         // Badge par activité individuelle
         matchingActivities = filteredActivities.filter(activity => {
