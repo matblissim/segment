@@ -236,15 +236,33 @@ router.post('/calculate-stats', (req, res) => {
         ...badge,
         count,
         earned: count > 0,
-        activities: matchingActivities.map(a => ({
-          id: a.id,
-          name: a.name,
-          distance: a.distance,
-          elevation: a.total_elevation_gain,
-          start_date: a.start_date,
-          type: a.type,
-          city: a.start_city || a.location_city || a.timezone?.split('/')[1] || 'Non spécifiée'
-        }))
+        activities: matchingActivities.map(a => {
+          // Extraire la ville du timezone si disponible
+          let city = null;
+          if (a.raw_data) {
+            const rawData = typeof a.raw_data === 'string' ? JSON.parse(a.raw_data) : a.raw_data;
+            city = rawData.location_city || rawData.start_city;
+
+            // Si pas de ville, extraire du timezone
+            if (!city && rawData.timezone) {
+              // Format: "(GMT+01:00) Europe/Paris" → "Paris"
+              const tzMatch = rawData.timezone.match(/\/([^/]+)$/);
+              if (tzMatch) {
+                city = tzMatch[1];
+              }
+            }
+          }
+
+          return {
+            id: a.id,
+            name: a.name,
+            distance: a.distance,
+            elevation: a.total_elevation_gain,
+            start_date: a.start_date,
+            type: a.type,
+            city: city || null
+          };
+        })
       };
     });
   };
