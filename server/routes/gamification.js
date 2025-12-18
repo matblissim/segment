@@ -97,6 +97,15 @@ const CHALLENGES = [
 router.post('/calculate-stats', (req, res) => {
   const { activities } = req.body;
 
+  console.log('\n========================================');
+  console.log('🚀 CALCULATE-STATS APPELÉ:', new Date().toISOString());
+  console.log('Nombre d\'activités reçues:', activities ? activities.length : 0);
+  console.log('Type de activities:', typeof activities, Array.isArray(activities));
+  if (activities && activities.length > 0) {
+    console.log('Première activité - distance:', activities[0].distance, typeof activities[0].distance);
+  }
+  console.log('========================================\n');
+
   if (!activities || !Array.isArray(activities)) {
     return res.status(400).json({ error: 'Activities array required' });
   }
