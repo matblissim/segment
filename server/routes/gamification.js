@@ -140,6 +140,21 @@ router.post('/calculate-stats', (req, res) => {
   const calculateBadges = (badgeList, activityTypes) => {
     const filteredActivities = activities.filter(a => activityTypes.includes(a.type));
 
+    // Debug: vérifier la structure des activités
+    if (badgeList.some(b => b.id === 'week_100k') && filteredActivities.length > 0) {
+      console.log('\n🔍 DEBUG Activités reçues:');
+      console.log('Nombre total activités:', activities.length);
+      console.log('Activités running filtrées:', filteredActivities.length);
+      console.log('Exemple d\'activité (première):');
+      const sample = filteredActivities[0];
+      console.log('  - id:', sample.id);
+      console.log('  - type:', sample.type);
+      console.log('  - distance:', sample.distance, typeof sample.distance);
+      console.log('  - total_elevation_gain:', sample.total_elevation_gain);
+      console.log('  - start_date:', sample.start_date);
+      console.log('  - Toutes les clés:', Object.keys(sample).join(', '));
+    }
+
     return badgeList.map(badge => {
       let matchingActivities = [];
       let count = 0;
