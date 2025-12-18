@@ -10,6 +10,7 @@ import Badges from './pages/Badges';
 import Challenges from './pages/Challenges';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import AdminUserView from './pages/AdminUserView';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -89,6 +90,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/user/:userId"
+              element={
+                <ProtectedRoute>
+                  <AdminUserView />
                 </ProtectedRoute>
               }
             />
