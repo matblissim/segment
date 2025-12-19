@@ -9,6 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "overrides": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@material-tailwind/react": "^2.1.10",
