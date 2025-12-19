@@ -145,8 +145,8 @@ export default function Badges() {
                           if (!weekGroups[weekKey]) {
                             weekGroups[weekKey] = { distance: 0, elevation: 0, activities: [] };
                           }
-                          weekGroups[weekKey].distance += activity.distance || 0;
-                          weekGroups[weekKey].elevation += activity.total_elevation_gain || 0;
+                          weekGroups[weekKey].distance += Number(activity.distance) || 0;
+                          weekGroups[weekKey].elevation += Number(activity.total_elevation_gain) || 0;
                           weekGroups[weekKey].activities.push(activity);
                         });
 
