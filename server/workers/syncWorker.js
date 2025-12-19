@@ -25,10 +25,12 @@ export const syncWorker = new Worker(
 
     console.log(`🚀 Processing sync job ${job.id} for user ${userId}`);
 
-    // Créer un enregistrement dans sync_jobs
+    // Créer ou mettre à jour l'enregistrement dans sync_jobs
     const jobRecord = await pool.query(
-      `INSERT INTO sync_jobs (user_id, job_id, status)
-       VALUES ($1, $2, $3)
+      `INSERT INTO sync_jobs (user_id, job_id, status, started_at)
+       VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (job_id)
+       DO UPDATE SET status = $3, started_at = NOW(), completed_at = NULL, error_message = NULL
        RETURNING *`,
       [userId, job.id, 'processing']
     );
