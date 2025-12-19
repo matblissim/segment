@@ -167,7 +167,11 @@ export default function Badges() {
                                 </Typography>
                               </div>
                               <Chip
-                                value={`${(week.distance / 1000).toFixed(1)} km`}
+                                value={
+                                  badge.metric === 'elevation'
+                                    ? `${Math.round(week.elevation)} D+`
+                                    : `${(week.distance / 1000).toFixed(1)} km`
+                                }
                                 color="gray"
                                 variant="ghost"
                                 className="font-semibold"
