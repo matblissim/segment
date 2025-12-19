@@ -153,8 +153,9 @@ export const stravaApi = {
 
 // Gamification API
 export const gamificationApi = {
-  calculateStats: async (activities) => {
-    const response = await axios.post(`${API_BASE_URL}/gamification/calculate-stats`, { activities });
+  calculateStats: async () => {
+    // Le backend récupère les activités depuis la DB avec le user ID du token
+    const response = await axios.post(`${API_BASE_URL}/gamification/calculate-stats`, {});
     return response.data;
   },
 

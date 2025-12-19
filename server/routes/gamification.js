@@ -1,4 +1,6 @@
 import express from 'express';
+import Activity from '../models/Activity.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -94,22 +96,25 @@ const CHALLENGES = [
   }
 ];
 
-// Calculer les statistiques à partir des activités
-router.post('/calculate-stats', (req, res) => {
-  const { activities } = req.body;
+// Calculer les statistiques à partir des activités (avec auth + DB)
+router.post('/calculate-stats', authenticateToken, async (req, res) => {
+  try {
+    console.log('\n========================================');
+    console.log('🚀 CALCULATE-STATS APPELÉ:', new Date().toISOString());
+    console.log('User ID:', req.userId);
 
-  console.log('\n========================================');
-  console.log('🚀 CALCULATE-STATS APPELÉ:', new Date().toISOString());
-  console.log('Nombre d\'activités reçues:', activities ? activities.length : 0);
-  console.log('Type de activities:', typeof activities, Array.isArray(activities));
-  if (activities && activities.length > 0) {
-    console.log('Première activité - distance:', activities[0].distance, typeof activities[0].distance);
-  }
-  console.log('========================================\n');
+    // Récupérer les activités depuis la DB
+    const activities = await Activity.findAllByUserId(req.userId);
 
-  if (!activities || !Array.isArray(activities)) {
-    return res.status(400).json({ error: 'Activities array required' });
-  }
+    console.log('Nombre d\'activités depuis DB:', activities.length);
+    if (activities.length > 0) {
+      console.log('Première activité - distance:', activities[0].distance, typeof activities[0].distance);
+    }
+    console.log('========================================\n');
+
+    if (!activities || !Array.isArray(activities)) {
+      return res.status(500).json({ error: 'Failed to fetch activities' });
+    }
 
   // Calculer les stats
   let stats = {
@@ -314,6 +319,10 @@ router.post('/calculate-stats', (req, res) => {
     totalBadges: allBadges.filter(b => b.earned).length,
     totalChallengesCompleted: challengeProgress.filter(c => c.completed).length
   });
+  } catch (error) {
+    console.error('❌ Error calculating stats:', error);
+    res.status(500).json({ error: 'Failed to calculate stats' });
+  }
 });
 
 // Obtenir tous les badges disponibles

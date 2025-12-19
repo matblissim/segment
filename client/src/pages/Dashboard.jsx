@@ -35,8 +35,8 @@ export default function Dashboard() {
       const activities = activitiesData.activities || activitiesData;
       setAllActivities(activities);
 
-      // Calculer les badges
-      const gamificationData = await gamificationApi.calculateStats(activities);
+      // Calculer les badges (le backend récupère les activités depuis la DB)
+      const gamificationData = await gamificationApi.calculateStats();
       setRunningBadges(gamificationData.runningBadges || []);
       setCyclingBadges(gamificationData.cyclingBadges || []);
       setChallenges(gamificationData.challenges || []);

@@ -23,10 +23,8 @@ export default function Badges() {
   const loadBadges = async () => {
     try {
       setLoading(true);
-      const data = await activitiesApi.getAllActivities();
-      const activities = data.activities || data;
-
-      const gamificationData = await gamificationApi.calculateStats(activities);
+      // Le backend récupère les activités depuis la DB
+      const gamificationData = await gamificationApi.calculateStats();
       setRunningBadges(gamificationData.runningBadges || []);
       setCyclingBadges(gamificationData.cyclingBadges || []);
     } catch (error) {

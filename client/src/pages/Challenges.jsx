@@ -21,9 +21,8 @@ export default function Challenges() {
   const loadChallenges = async () => {
     try {
       setLoading(true);
-      const data = await activitiesApi.getAllActivities();
-      const activities = data.activities || data;
-      const gamificationData = await gamificationApi.calculateStats(activities);
+      // Le backend récupère les activités depuis la DB
+      const gamificationData = await gamificationApi.calculateStats();
       setChallenges(gamificationData.challenges || []);
     } catch (error) {
       console.error('Error loading challenges:', error);
