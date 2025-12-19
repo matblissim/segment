@@ -72,28 +72,30 @@ export default function Layout({ children, showSportToggle = true }) {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-4">
+        <nav className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8">
+          {/* Mobile: Stack vertically */}
+          <div className="flex flex-col sm:flex-row sm:h-16 sm:items-center sm:justify-between gap-3 py-3 sm:py-0">
+            {/* Left: User info */}
+            <div className="flex items-center gap-3 flex-shrink-0">
               <Avatar
-                src={user?.profile || 'https://via.placeholder.com/150'}
+                src={user?.profile_photo || 'https://via.placeholder.com/150'}
                 alt={user?.firstname}
-                size="md"
+                size="sm"
                 className="ring-2 ring-gray-200"
               />
-              <div>
-                <Typography variant="h6" color="blue-gray">
+              <div className="min-w-0 flex-1">
+                <Typography variant="small" color="blue-gray" className="font-semibold truncate">
                   {user?.firstname} {user?.lastname}
                 </Typography>
-                <Typography variant="small" color="gray" className="font-normal">
+                <Typography variant="small" color="gray" className="font-normal text-xs">
                   {syncInfo?.activityCount || 0} activités
                 </Typography>
               </div>
             </div>
 
-            {/* Sport Toggle - Only show on certain pages */}
+            {/* Center: Sport Toggle - Show on larger screens */}
             {showSportToggle && (
-              <div className="flex items-center gap-2 border-l border-r border-gray-200 px-4">
+              <div className="hidden sm:flex items-center gap-2 border-l border-r border-gray-200 px-4">
                 <Button
                   size="sm"
                   color="gray"
@@ -115,25 +117,27 @@ export default function Layout({ children, showSportToggle = true }) {
               </div>
             )}
 
+            {/* Right: Actions */}
             <div className="flex items-center gap-2">
               {syncInfo && (
                 <Chip
                   value={syncInfo.syncStatus === 'syncing' ? 'Sync...' : 'Sync OK'}
                   color={getSyncChipColor()}
                   variant="ghost"
-                  className="capitalize"
+                  size="sm"
+                  className="capitalize hidden sm:inline-flex"
                 />
               )}
               <Button
                 size="sm"
                 color="gray"
                 variant="text"
-                className="flex items-center gap-2"
+                className="flex items-center gap-1 px-2"
                 onClick={handleSync}
                 disabled={syncing || syncInfo?.syncStatus === 'syncing'}
               >
                 <ArrowPathIcon className={`h-4 w-4 ${syncing || syncInfo?.syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
-                Sync
+                <span className="hidden sm:inline">Sync</span>
               </Button>
               <IconButton
                 size="sm"
@@ -141,72 +145,98 @@ export default function Layout({ children, showSportToggle = true }) {
                 variant="text"
                 onClick={logout}
               >
-                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                <ArrowRightOnRectangleIcon className="h-4 w-4" />
               </IconButton>
             </div>
           </div>
         </nav>
 
+        {/* Sport Toggle - Mobile version */}
+        {showSportToggle && (
+          <div className="sm:hidden mx-auto max-w-7xl px-2 pb-2">
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                color="gray"
+                variant={sportFilter === 'running' ? 'filled' : 'outlined'}
+                onClick={() => setSportFilter('running')}
+                className="normal-case flex-1"
+              >
+                🏃 Course
+              </Button>
+              <Button
+                size="sm"
+                color="gray"
+                variant={sportFilter === 'cycling' ? 'filled' : 'outlined'}
+                onClick={() => setSportFilter('cycling')}
+                className="normal-case flex-1"
+              >
+                🚴 Vélo
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Navigation Tabs */}
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 border-t border-gray-200">
-          <div className="flex gap-1">
-            <Link to="/dashboard">
+        <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 border-t border-gray-200">
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+            <Link to="/dashboard" className="flex-shrink-0">
               <Button
                 color="gray"
                 variant="text"
                 size="sm"
-                className={`rounded-none ${isActive('/dashboard') ? 'border-b-2 border-gray-900' : ''}`}
+                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/dashboard') ? 'border-b-2 border-gray-900' : ''}`}
               >
-                Tableau de bord
+                Dashboard
               </Button>
             </Link>
-            <Link to="/activities">
+            <Link to="/activities" className="flex-shrink-0">
               <Button
                 color="gray"
                 variant="text"
                 size="sm"
-                className={`rounded-none ${isActive('/activities') ? 'border-b-2 border-gray-900' : ''}`}
+                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/activities') ? 'border-b-2 border-gray-900' : ''}`}
               >
                 Activités
               </Button>
             </Link>
-            <Link to="/badges">
+            <Link to="/badges" className="flex-shrink-0">
               <Button
                 color="gray"
                 variant="text"
                 size="sm"
-                className={`rounded-none ${isActive('/badges') ? 'border-b-2 border-gray-900' : ''}`}
+                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/badges') ? 'border-b-2 border-gray-900' : ''}`}
               >
                 Badges
               </Button>
             </Link>
-            <Link to="/stats">
+            <Link to="/stats" className="flex-shrink-0">
               <Button
                 color="gray"
                 variant="text"
                 size="sm"
-                className={`rounded-none ${isActive('/stats') ? 'border-b-2 border-gray-900' : ''}`}
+                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/stats') ? 'border-b-2 border-gray-900' : ''}`}
               >
-                Statistiques
+                Stats
               </Button>
             </Link>
-            <Link to="/profile">
+            <Link to="/profile" className="flex-shrink-0">
               <Button
                 color="gray"
                 variant="text"
                 size="sm"
-                className={`rounded-none ${isActive('/profile') ? 'border-b-2 border-gray-900' : ''}`}
+                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/profile') ? 'border-b-2 border-gray-900' : ''}`}
               >
                 Profil
               </Button>
             </Link>
             {user?.role === 'admin' && (
-              <Link to="/admin">
+              <Link to="/admin" className="flex-shrink-0">
                 <Button
                   color="gray"
                   variant="text"
                   size="sm"
-                  className={`rounded-none ${isActive('/admin') ? 'border-b-2 border-gray-900' : ''}`}
+                  className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/admin') ? 'border-b-2 border-gray-900' : ''}`}
                 >
                   Admin
                 </Button>
@@ -217,7 +247,7 @@ export default function Layout({ children, showSportToggle = true }) {
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <main className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {children}
       </main>
     </div>
