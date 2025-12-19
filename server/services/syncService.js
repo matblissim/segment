@@ -2,6 +2,7 @@ import axios from 'axios';
 import User from '../models/User.js';
 import Activity from '../models/Activity.js';
 import { invalidateUserCache } from '../config/database.js';
+import { geocodeUserActivities } from './geocoding.js';
 
 class SyncService {
   // Rafraîchir le token Strava si nécessaire
@@ -136,6 +137,18 @@ class SyncService {
 
       console.log(`✅ Sync completed for user ${userId}: ${newActivities} new activities`);
 
+      // Géocoder automatiquement les nouvelles activités en arrière-plan (non bloquant)
+      if (newActivities > 0) {
+        console.log(`🌍 Géocodage automatique de ${newActivities} nouvelles activités...`);
+        geocodeUserActivities(userId, newActivities)
+          .then((result) => {
+            console.log(`✅ Géocodage terminé: ${result.success}/${result.processed} activités`);
+          })
+          .catch((error) => {
+            console.error(`⚠️  Géocodage échoué (non critique):`, error.message);
+          });
+      }
+
       return {
         success: true,
         totalFetched: totalActivities,
@@ -177,6 +190,16 @@ class SyncService {
       if (newActivities.length > 0) {
         await Activity.batchUpsert(userId, newActivities);
         await invalidateUserCache(userId);
+
+        // Géocoder automatiquement les nouvelles activités (non bloquant)
+        console.log(`🌍 Géocodage automatique de ${newActivities.length} nouvelles activités...`);
+        geocodeUserActivities(userId, newActivities.length)
+          .then((result) => {
+            console.log(`✅ Géocodage terminé: ${result.success}/${result.processed} activités`);
+          })
+          .catch((error) => {
+            console.error(`⚠️  Géocodage échoué (non critique):`, error.message);
+          });
       }
 
       return {
