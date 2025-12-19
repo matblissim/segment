@@ -258,7 +258,7 @@ router.post('/calculate-stats', (req, res) => {
             id: a.id,
             name: a.name,
             distance: a.distance,
-            elevation: a.total_elevation_gain,
+            total_elevation_gain: a.total_elevation_gain,
             start_date: a.start_date,
             type: a.type,
             city: city || null
