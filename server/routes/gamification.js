@@ -43,6 +43,7 @@ const RUNNING_BADGES = [
   { id: 'week_100k', name: 'Semaine 100K+', description: 'Semaine avec 100+ km', sportType: 'running', threshold: 100000, weekly: true, metric: 'distance' },
   { id: 'week_150k', name: 'Semaine 150K+', description: 'Semaine avec 150+ km', sportType: 'running', threshold: 150000, weekly: true, metric: 'distance' },
   { id: 'week_200k', name: 'Semaine 200K+', description: 'Semaine avec 200+ km', sportType: 'running', threshold: 200000, weekly: true, metric: 'distance' },
+  { id: 'week_3kd', name: 'Semaine 3000D+', description: 'Semaine avec 3000m de dénivelé', sportType: 'running', threshold: 3000, weekly: true, metric: 'elevation' },
   { id: 'week_5kd', name: 'Semaine 5000D+', description: 'Semaine avec 5000m de dénivelé', sportType: 'running', threshold: 5000, weekly: true, metric: 'elevation' },
   { id: 'week_10kd', name: 'Semaine 10000D+', description: 'Semaine avec 10000m de dénivelé', sportType: 'running', threshold: 10000, weekly: true, metric: 'elevation' },
 ];
