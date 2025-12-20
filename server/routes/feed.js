@@ -1,11 +1,11 @@
 import express from 'express';
 import Feed from '../models/Feed.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Toutes les routes nécessitent l'authentification
-router.use(authenticate);
+router.use(authenticateToken);
 
 /**
  * GET /api/feed
