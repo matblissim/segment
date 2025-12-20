@@ -285,3 +285,118 @@ export const friendsApi = {
     return response.data;
   },
 };
+
+// Feed API (nécessite authentification)
+export const feedApi = {
+  // Obtenir le feed de l'utilisateur
+  getFeed: async (limit = 50, offset = 0) => {
+    const response = await axios.get(`${API_BASE_URL}/feed`, {
+      headers: getAuthHeaders(),
+      params: { limit, offset },
+    });
+    return response.data;
+  },
+
+  // Obtenir les détails d'une activité
+  getActivityDetails: async (activityId) => {
+    const response = await axios.get(`${API_BASE_URL}/feed/activity/${activityId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Liker une activité
+  likeActivity: async (activityId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/feed/activity/${activityId}/like`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Retirer le like d'une activité
+  unlikeActivity: async (activityId) => {
+    const response = await axios.delete(
+      `${API_BASE_URL}/feed/activity/${activityId}/like`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Obtenir les likes d'une activité
+  getActivityLikes: async (activityId) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/feed/activity/${activityId}/likes`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Ajouter un commentaire
+  addComment: async (activityId, comment) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/feed/activity/${activityId}/comment`,
+      { comment },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Modifier un commentaire
+  updateComment: async (commentId, comment) => {
+    const response = await axios.put(
+      `${API_BASE_URL}/feed/comment/${commentId}`,
+      { comment },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Supprimer un commentaire
+  deleteComment: async (commentId) => {
+    const response = await axios.delete(
+      `${API_BASE_URL}/feed/comment/${commentId}`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Obtenir les commentaires d'une activité
+  getActivityComments: async (activityId) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/feed/activity/${activityId}/comments`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Obtenir les notifications
+  getNotifications: async (limit = 50, unreadOnly = false) => {
+    const response = await axios.get(`${API_BASE_URL}/feed/notifications`, {
+      headers: getAuthHeaders(),
+      params: { limit, unread: unreadOnly },
+    });
+    return response.data;
+  },
+
+  // Marquer une notification comme lue
+  markNotificationAsRead: async (notificationId) => {
+    const response = await axios.put(
+      `${API_BASE_URL}/feed/notifications/${notificationId}/read`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Marquer toutes les notifications comme lues
+  markAllNotificationsAsRead: async () => {
+    const response = await axios.put(
+      `${API_BASE_URL}/feed/notifications/read-all`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+};
