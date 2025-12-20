@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.js';
 import activitiesRoutes from './routes/activities.js';
 import syncRoutes from './routes/sync.js';
 import adminRoutes from './routes/admin.js';
+import friendsRoutes from './routes/friends.js';
 
 // Import de la configuration DB et du worker
 import { pool, redis } from './config/database.js';
@@ -40,6 +41,9 @@ app.use('/api/sync', syncRoutes);
 
 // Routes admin (nécessite authentification + rôle admin)
 app.use('/api/admin', adminRoutes);
+
+// Routes amis (nécessite authentification)
+app.use('/api/friends', friendsRoutes);
 
 // Routes Strava legacy (pour compatibilité)
 app.use('/api/strava', stravaRoutes);

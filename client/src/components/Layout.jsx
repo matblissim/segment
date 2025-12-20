@@ -210,6 +210,16 @@ export default function Layout({ children, showSportToggle = true }) {
                 Badges
               </Button>
             </Link>
+            <Link to="/friends" className="flex-shrink-0">
+              <Button
+                color="gray"
+                variant="text"
+                size="sm"
+                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/friends') ? 'border-b-2 border-gray-900' : ''}`}
+              >
+                Amis
+              </Button>
+            </Link>
             <Link to="/stats" className="flex-shrink-0">
               <Button
                 color="gray"

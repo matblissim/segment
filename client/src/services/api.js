@@ -202,3 +202,86 @@ export const adminApi = {
     return response.data;
   },
 };
+
+// Friends API (nécessite authentification)
+export const friendsApi = {
+  // Chercher des utilisateurs
+  searchUsers: async (query) => {
+    const response = await axios.get(`${API_BASE_URL}/friends/search`, {
+      headers: getAuthHeaders(),
+      params: { q: query },
+    });
+    return response.data;
+  },
+
+  // Obtenir la liste des amis
+  getFriends: async () => {
+    const response = await axios.get(`${API_BASE_URL}/friends`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Obtenir les demandes reçues
+  getPendingRequests: async () => {
+    const response = await axios.get(`${API_BASE_URL}/friends/pending`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Obtenir les demandes envoyées
+  getSentRequests: async () => {
+    const response = await axios.get(`${API_BASE_URL}/friends/sent`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Envoyer une demande d'ami
+  sendRequest: async (friendId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/friends/request/${friendId}`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Accepter une demande
+  acceptRequest: async (friendshipId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/friends/accept/${friendshipId}`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Rejeter une demande
+  rejectRequest: async (friendshipId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/friends/reject/${friendshipId}`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Supprimer un ami
+  removeFriend: async (friendshipId) => {
+    const response = await axios.delete(
+      `${API_BASE_URL}/friends/remove/${friendshipId}`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Vérifier le statut d'amitié
+  checkStatus: async (userId) => {
+    const response = await axios.get(`${API_BASE_URL}/friends/status/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+};
