@@ -6,6 +6,7 @@ import { pool } from '../config/database.js';
 // Créer la queue pour les jobs de synchronisation
 export const syncQueue = new Queue('strava-sync', {
   connection: redis,
+  skipVersionCheck: true, // Désactiver le warning de version Redis
   defaultJobOptions: {
     attempts: 3,
     backoff: {
@@ -83,6 +84,7 @@ export const syncWorker = new Worker(
   },
   {
     connection: redis,
+    skipVersionCheck: true, // Désactiver le warning de version Redis
     concurrency: 3, // Traiter 3 jobs en parallèle max
   }
 );
