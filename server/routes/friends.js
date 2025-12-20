@@ -12,11 +12,11 @@ router.get('/search', async (req, res) => {
   try {
     const { q } = req.query;
 
-    if (!q || q.length < 2) {
-      return res.status(400).json({ error: 'Search query must be at least 2 characters' });
-    }
+    // Si q est vide ou undefined, on recherche tous les users
+    // Sinon, on applique le filtre de recherche
+    const query = q || '';
 
-    const users = await Friendship.searchUsers(q, req.userId);
+    const users = await Friendship.searchUsers(query, req.userId);
 
     res.json({ users });
   } catch (error) {

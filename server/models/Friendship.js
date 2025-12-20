@@ -117,6 +117,24 @@ class Friendship {
 
   // Chercher des utilisateurs (pour ajouter des amis)
   static async searchUsers(query, currentUserId, limit = 20) {
+    // Si query est vide, retourner tous les users (sauf l'utilisateur courant)
+    if (!query || query.length === 0) {
+      const result = await pool.query(
+        `SELECT id, username, strava_id, created_at,
+                (SELECT status FROM friendships
+                 WHERE (user_id = $1 AND friend_id = users.id)
+                    OR (user_id = users.id AND friend_id = $1)
+                 LIMIT 1) as friendship_status
+         FROM users
+         WHERE id != $1
+         ORDER BY username
+         LIMIT $2`,
+        [currentUserId, limit]
+      );
+      return result.rows;
+    }
+
+    // Sinon, filtrer par le query
     const result = await pool.query(
       `SELECT id, username, strava_id, created_at,
               (SELECT status FROM friendships

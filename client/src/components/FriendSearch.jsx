@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input, Typography, Spinner } from '@material-tailwind/react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { friendsApi } from '../services/api';
@@ -7,15 +7,41 @@ import FriendCard from './FriendCard';
 export default function FriendSearch({ onRequestSent }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Charger tous les users au démarrage
+  useEffect(() => {
+    loadAllUsers();
+  }, []);
+
+  const loadAllUsers = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Recherche avec une chaîne vide pour obtenir tous les users
+      const data = await friendsApi.searchUsers('');
+      setResults(data.users);
+    } catch (err) {
+      console.error('Error loading users:', err);
+      setError('Erreur lors du chargement des utilisateurs');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = async (searchQuery) => {
     setQuery(searchQuery);
 
+    // Si la recherche est vide, afficher tous les users
+    if (searchQuery.length === 0) {
+      loadAllUsers();
+      return;
+    }
+
+    // Sinon, chercher avec le query
     if (searchQuery.length < 2) {
-      setResults([]);
-      setError('');
       return;
     }
 
