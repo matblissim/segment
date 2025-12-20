@@ -1,4 +1,4 @@
-import { Card, CardBody, Typography, Button, Avatar } from '@material-tailwind/react';
+import { Card, CardBody, Typography, Button } from '@material-tailwind/react';
 import { UserMinusIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function FriendCard({ friend, type = 'friend', onAction }) {
@@ -79,16 +79,9 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
     <Card className="w-full">
       <CardBody className="flex flex-row items-center justify-between p-4">
         <div className="flex items-center gap-4">
-          <Avatar
-            variant="circular"
-            alt={friend.username || friend.friend_username}
-            className="border border-gray-900"
-            size="lg"
-          >
-            <div className="bg-blue-500 text-white w-full h-full flex items-center justify-center">
-              {getInitials(friend.username || friend.friend_username)}
-            </div>
-          </Avatar>
+          <div className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-lg border-2 border-gray-300">
+            {getInitials(friend.username || friend.friend_username)}
+          </div>
           <div>
             <Typography variant="h6" color="blue-gray">
               {friend.username || friend.friend_username}
