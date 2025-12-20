@@ -10,6 +10,7 @@ import Badges from './pages/Badges';
 import Challenges from './pages/Challenges';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
+import Feed from './pages/Feed';
 import Admin from './pages/Admin';
 import AdminUserView from './pages/AdminUserView';
 
@@ -91,6 +92,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Friends />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/feed"
+              element={
+                <ProtectedRoute>
+                  <Feed />
                 </ProtectedRoute>
               }
             />
