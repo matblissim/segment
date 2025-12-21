@@ -288,11 +288,20 @@ router.post('/calculate-stats', authenticateToken, async (req, res) => {
           ? badge.activities[badge.activities.length - 1]
           : null;
 
+        // Déterminer la date du badge
+        // Pour les badges hebdomadaires, utiliser la date de la dernière activité de la semaine
+        // Pour les badges d'activité, utiliser la date de l'activité
+        let achievedAt = null;
+        if (latestActivity && latestActivity.start_date) {
+          achievedAt = new Date(latestActivity.start_date);
+        }
+
         await Feed.recordBadgeAchievement(
           req.userId,
           badge,
           sportType,
-          latestActivity?.id || null
+          latestActivity?.id || null,
+          achievedAt
         );
       }
     }

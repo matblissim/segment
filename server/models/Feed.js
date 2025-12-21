@@ -15,14 +15,35 @@ class Feed {
   /**
    * Enregistrer un achievement de badge
    */
-  static async recordBadgeAchievement(userId, badge, sportType, activityId = null) {
+  static async recordBadgeAchievement(userId, badge, sportType, activityId = null, achievedAt = null) {
+    // Si pas de date fournie, on cherche la date de l'activité associée
+    let badgeDate = achievedAt;
+
+    if (!badgeDate && activityId) {
+      const activityResult = await pool.query(
+        'SELECT start_date FROM activities WHERE id = $1',
+        [activityId]
+      );
+      if (activityResult.rows.length > 0) {
+        badgeDate = activityResult.rows[0].start_date;
+      }
+    }
+
+    // Si toujours pas de date, utiliser NOW()
+    if (!badgeDate) {
+      badgeDate = new Date();
+    }
+
     const result = await pool.query(
-      `INSERT INTO badge_achievements (user_id, badge_id, badge_name, badge_description, sport_type, activity_id, count)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO badge_achievements (user_id, badge_id, badge_name, badge_description, sport_type, activity_id, count, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        ON CONFLICT (user_id, badge_id)
-       DO UPDATE SET count = badge_achievements.count + 1, created_at = NOW()
+       DO UPDATE SET
+         count = badge_achievements.count + 1,
+         activity_id = EXCLUDED.activity_id,
+         created_at = EXCLUDED.created_at
        RETURNING *`,
-      [userId, badge.id, badge.name, badge.description, sportType, activityId, badge.count || 1]
+      [userId, badge.id, badge.name, badge.description, sportType, activityId, badge.count || 1, badgeDate]
     );
     return result.rows[0];
   }
