@@ -143,7 +143,7 @@ export default function FeedWidget() {
                         {item.username}
                       </Typography>
                       <Typography variant="small" color="gray" className="text-xs">
-                        {getRelativeTime(item.created_at)}
+                        {getRelativeTime(item.item_type === 'activity' ? item.start_date : item.created_at)}
                       </Typography>
                     </div>
 
