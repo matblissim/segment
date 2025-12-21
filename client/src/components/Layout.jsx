@@ -220,16 +220,6 @@ export default function Layout({ children, showSportToggle = true }) {
                 Amis
               </Button>
             </Link>
-            <Link to="/feed" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/feed') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Feed
-              </Button>
-            </Link>
             <Link to="/stats" className="flex-shrink-0">
               <Button
                 color="gray"

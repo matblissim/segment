@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { activitiesApi, gamificationApi } from '../services/api';
 import { useSportFilter } from '../contexts/SportFilterContext';
 import Layout from '../components/Layout';
+import FeedWidget from '../components/FeedWidget';
 import {
   Card,
   CardBody,
@@ -244,51 +245,57 @@ export default function Dashboard() {
           </CardBody>
         </Card>
 
-        {/* Challenges */}
-        <Card className="border border-gray-200 shadow-none">
-          <CardHeader
-            floated={false}
-            shadow={false}
-            color="transparent"
-            className="m-0 p-6 border-b border-gray-200"
-          >
-            <Typography variant="h6" color="blue-gray">
-              Challenges
-            </Typography>
-          </CardHeader>
-          <CardBody className="pt-4">
-            {challenges.length > 0 ? (
-              <div className="space-y-4">
-                {challenges.slice(0, 3).map((challenge) => (
-                  <div key={challenge.id}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
+        {/* Right column: Feed + Challenges */}
+        <div className="space-y-6">
+          {/* Feed Widget */}
+          <FeedWidget />
+
+          {/* Challenges */}
+          <Card className="border border-gray-200 shadow-none">
+            <CardHeader
+              floated={false}
+              shadow={false}
+              color="transparent"
+              className="m-0 p-6 border-b border-gray-200"
+            >
+              <Typography variant="h6" color="blue-gray">
+                Challenges
+              </Typography>
+            </CardHeader>
+            <CardBody className="pt-4">
+              {challenges.length > 0 ? (
+                <div className="space-y-4">
+                  {challenges.slice(0, 3).map((challenge) => (
+                    <div key={challenge.id}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <Typography variant="small" color="blue-gray" className="font-semibold">
+                            {challenge.name}
+                          </Typography>
+                          <Typography variant="small" color="gray">
+                            +{challenge.reward} points
+                          </Typography>
+                        </div>
                         <Typography variant="small" color="blue-gray" className="font-semibold">
-                          {challenge.name}
-                        </Typography>
-                        <Typography variant="small" color="gray">
-                          +{challenge.reward} points
+                          {Number(challenge.progress || 0).toFixed(0)}%
                         </Typography>
                       </div>
-                      <Typography variant="small" color="blue-gray" className="font-semibold">
-                        {Number(challenge.progress || 0).toFixed(0)}%
-                      </Typography>
+                      <Progress
+                        value={Math.min(challenge.progress || 0, 100)}
+                        color="gray"
+                        className="h-2"
+                      />
                     </div>
-                    <Progress
-                      value={Math.min(challenge.progress || 0, 100)}
-                      color="gray"
-                      className="h-2"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Typography variant="small" color="gray" className="text-center py-8">
-                Aucun challenge actif
-              </Typography>
-            )}
-          </CardBody>
-        </Card>
+                  ))}
+                </div>
+              ) : (
+                <Typography variant="small" color="gray" className="text-center py-8">
+                  Aucun challenge actif
+                </Typography>
+              )}
+            </CardBody>
+          </Card>
+        </div>
       </div>
     </Layout>
   );
