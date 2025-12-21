@@ -13,6 +13,7 @@ import syncRoutes from './routes/sync.js';
 import adminRoutes from './routes/admin.js';
 import friendsRoutes from './routes/friends.js';
 import feedRoutes from './routes/feed.js';
+import eventsRoutes from './routes/events.js';
 
 // Import de la configuration DB et du worker
 import { pool, redis } from './config/database.js';
@@ -48,6 +49,9 @@ app.use('/api/friends', friendsRoutes);
 
 // Routes feed (nécessite authentification)
 app.use('/api/feed', feedRoutes);
+
+// Routes events (nécessite authentification)
+app.use('/api/events', eventsRoutes);
 
 // Routes Strava legacy (pour compatibilité)
 app.use('/api/strava', stravaRoutes);

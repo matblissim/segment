@@ -3,6 +3,7 @@ import { activitiesApi, gamificationApi } from '../services/api';
 import { useSportFilter } from '../contexts/SportFilterContext';
 import Layout from '../components/Layout';
 import FeedWidget from '../components/FeedWidget';
+import EventsWidget from '../components/EventsWidget';
 import {
   Card,
   CardBody,
@@ -245,10 +246,13 @@ export default function Dashboard() {
           </CardBody>
         </Card>
 
-        {/* Right column: Feed + Challenges */}
+        {/* Right column: Feed + Events + Challenges */}
         <div className="space-y-6">
           {/* Feed Widget */}
           <FeedWidget />
+
+          {/* Events Widget */}
+          <EventsWidget />
 
           {/* Challenges */}
           <Card className="border border-gray-200 shadow-none">

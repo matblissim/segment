@@ -11,6 +11,7 @@ import Challenges from './pages/Challenges';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import Feed from './pages/Feed';
+import Events from './pages/Events';
 import Admin from './pages/Admin';
 import AdminUserView from './pages/AdminUserView';
 
@@ -100,6 +101,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Feed />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                <ProtectedRoute>
+                  <Events />
                 </ProtectedRoute>
               }
             />

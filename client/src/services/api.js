@@ -400,3 +400,79 @@ export const feedApi = {
     return response.data;
   },
 };
+
+// Events API (nécessite authentification)
+export const eventsApi = {
+  // Obtenir tous les événements
+  getEvents: async () => {
+    const response = await axios.get(`${API_BASE_URL}/events`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Obtenir les événements par priorité (pour le dashboard)
+  getEventsByPriority: async (priority) => {
+    const response = await axios.get(`${API_BASE_URL}/events/priority/${priority}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Créer un événement
+  createEvent: async (eventData) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/events`,
+      eventData,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Participer à un événement
+  participate: async (eventId, priority = 'B') => {
+    const response = await axios.post(
+      `${API_BASE_URL}/events/${eventId}/participate`,
+      { priority },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Retirer sa participation
+  unparticipate: async (eventId) => {
+    const response = await axios.delete(
+      `${API_BASE_URL}/events/${eventId}/participate`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Obtenir les participants
+  getParticipants: async (eventId) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/events/${eventId}/participants`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Mettre à jour un événement
+  updateEvent: async (eventId, updates) => {
+    const response = await axios.put(
+      `${API_BASE_URL}/events/${eventId}`,
+      updates,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Supprimer un événement
+  deleteEvent: async (eventId) => {
+    const response = await axios.delete(
+      `${API_BASE_URL}/events/${eventId}`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+};
