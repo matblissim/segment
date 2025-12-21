@@ -120,4 +120,54 @@ router.get('/athlete/stats/:id', async (req, res) => {
   }
 });
 
+// Récupérer une activité détaillée par ID
+router.get('/activities/:id', async (req, res) => {
+  const { id } = req.params;
+  const { access_token } = req.query;
+
+  if (!access_token) {
+    return res.status(400).json({ error: 'Access token required' });
+  }
+
+  try {
+    const response = await axios.get(`https://www.strava.com/api/v3/activities/${id}`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching activity details:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch activity details' });
+  }
+});
+
+// Récupérer les streams d'une activité (données seconde par seconde)
+router.get('/activities/:id/streams', async (req, res) => {
+  const { id } = req.params;
+  const { access_token, keys = 'time,heartrate,altitude,velocity_smooth,cadence,distance' } = req.query;
+
+  if (!access_token) {
+    return res.status(400).json({ error: 'Access token required' });
+  }
+
+  try {
+    const response = await axios.get(`https://www.strava.com/api/v3/activities/${id}/streams`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`
+      },
+      params: {
+        keys,
+        key_by_type: true
+      }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching activity streams:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch activity streams' });
+  }
+});
+
 export default router;

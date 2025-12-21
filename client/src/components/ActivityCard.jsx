@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Card, CardBody, CardFooter, Typography, Button, Input, IconButton, Chip } from '@material-tailwind/react';
-import { HeartIcon, ChatBubbleLeftIcon, ClockIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, ChatBubbleLeftIcon, ClockIcon, MapPinIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import AIAnalysisDialog from './AIAnalysisDialog';
 
 export default function ActivityCard({ activity, onLike, onUnlike, onComment }) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isLiking, setIsLiking] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [showAIAnalysis, setShowAIAnalysis] = useState(false);
 
   const getInitials = (username) => {
     return username?.substring(0, 2).toUpperCase() || '??';
@@ -170,7 +172,7 @@ export default function ActivityCard({ activity, onLike, onUnlike, onComment }) 
       </CardBody>
 
       <CardFooter className="pt-0 px-4 pb-4">
-        {/* Actions (likes, comments) */}
+        {/* Actions (likes, comments, AI) */}
         <div className="flex items-center gap-4 mb-3 pb-3 border-b border-gray-200">
           <Button
             variant="text"
@@ -195,6 +197,17 @@ export default function ActivityCard({ activity, onLike, onUnlike, onComment }) 
           >
             <ChatBubbleLeftIcon className="h-5 w-5" />
             <span>{activity.comments_count || 0}</span>
+          </Button>
+
+          <Button
+            variant="gradient"
+            color="purple"
+            size="sm"
+            className="flex items-center gap-2 normal-case ml-auto"
+            onClick={() => setShowAIAnalysis(true)}
+          >
+            <SparklesIcon className="h-4 w-4" />
+            Analyse IA
           </Button>
         </div>
 
@@ -248,6 +261,15 @@ export default function ActivityCard({ activity, onLike, onUnlike, onComment }) 
           </div>
         )}
       </CardFooter>
+
+      {/* Dialog d'analyse IA */}
+      <AIAnalysisDialog
+        open={showAIAnalysis}
+        onClose={() => setShowAIAnalysis(false)}
+        activityId={activity.strava_activity_id}
+        activityName={activity.name}
+        isProfileAnalysis={false}
+      />
     </Card>
   );
 }

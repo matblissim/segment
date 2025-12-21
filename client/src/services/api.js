@@ -570,3 +570,26 @@ export const challengesApi = {
     return response.data;
   },
 };
+
+// AI Coaching API (nécessite authentification)
+export const aiApi = {
+  // Analyser une activité spécifique
+  analyzeActivity: async (activityId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/ai/analyze-activity/${activityId}`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Analyser le profil global du coureur
+  analyzeProfile: async () => {
+    const response = await axios.post(
+      `${API_BASE_URL}/ai/analyze-profile`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+};

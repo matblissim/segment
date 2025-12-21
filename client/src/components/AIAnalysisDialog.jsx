@@ -1,0 +1,205 @@
+import { Dialog, DialogHeader, DialogBody, DialogFooter, Button, Typography, Spinner } from '@material-tailwind/react';
+import { SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { aiApi } from '../services/api';
+
+export default function AIAnalysisDialog({ open, onClose, activityId, activityName, isProfileAnalysis = false }) {
+  const [loading, setLoading] = useState(false);
+  const [analysis, setAnalysis] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (open) {
+      loadAnalysis();
+    }
+  }, [open, activityId, isProfileAnalysis]);
+
+  const loadAnalysis = async () => {
+    setLoading(true);
+    setError(null);
+    setAnalysis(null);
+
+    try {
+      let result;
+      if (isProfileAnalysis) {
+        result = await aiApi.analyzeProfile();
+      } else {
+        result = await aiApi.analyzeActivity(activityId);
+      }
+      setAnalysis(result.analysis);
+    } catch (err) {
+      console.error('Error loading AI analysis:', err);
+      setError(err.response?.data?.error || 'Erreur lors de l\'analyse IA');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatAnalysis = (text) => {
+    if (!text) return null;
+
+    // Convert markdown-style formatting to HTML
+    return text
+      .split('\n')
+      .map((line, i) => {
+        // Headers
+        if (line.startsWith('## ')) {
+          return <Typography key={i} variant="h5" color="blue-gray" className="mt-4 mb-2 font-bold">{line.slice(3)}</Typography>;
+        }
+        if (line.startsWith('# ')) {
+          return <Typography key={i} variant="h4" color="blue-gray" className="mt-4 mb-2 font-bold">{line.slice(2)}</Typography>;
+        }
+
+        // Bold
+        if (line.startsWith('**') && line.endsWith('**')) {
+          return <Typography key={i} variant="paragraph" className="font-bold mt-2">{line.slice(2, -2)}</Typography>;
+        }
+
+        // Bullets
+        if (line.startsWith('- ') || line.startsWith('• ')) {
+          const content = line.slice(2);
+          // Check if it contains bold parts
+          const parts = content.split('**');
+          return (
+            <div key={i} className="flex gap-2 ml-4 mb-1">
+              <span className="text-blue-gray-700">•</span>
+              <Typography variant="small" color="blue-gray">
+                {parts.map((part, j) =>
+                  j % 2 === 1 ? <strong key={j}>{part}</strong> : part
+                )}
+              </Typography>
+            </div>
+          );
+        }
+
+        // Numbers (1. 2. etc.)
+        if (line.match(/^\d+\.\s/)) {
+          const content = line.replace(/^\d+\.\s/, '');
+          const parts = content.split('**');
+          return (
+            <div key={i} className="flex gap-2 ml-4 mb-1">
+              <Typography variant="small" color="blue-gray" className="font-medium">
+                {line.match(/^\d+\./)[0]}
+              </Typography>
+              <Typography variant="small" color="blue-gray">
+                {parts.map((part, j) =>
+                  j % 2 === 1 ? <strong key={j}>{part}</strong> : part
+                )}
+              </Typography>
+            </div>
+          );
+        }
+
+        // Empty line
+        if (line.trim() === '') {
+          return <div key={i} className="h-2" />;
+        }
+
+        // Regular text
+        const parts = line.split('**');
+        return (
+          <Typography key={i} variant="paragraph" color="blue-gray" className="mb-2">
+            {parts.map((part, j) =>
+              j % 2 === 1 ? <strong key={j}>{part}</strong> : part
+            )}
+          </Typography>
+        );
+      });
+  };
+
+  return (
+    <Dialog
+      open={open}
+      handler={onClose}
+      size="lg"
+      className="bg-white shadow-2xl"
+    >
+      <DialogHeader className="flex items-center justify-between border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <SparklesIcon className="h-6 w-6 text-purple-600" />
+          <div>
+            <Typography variant="h5" color="blue-gray">
+              {isProfileAnalysis ? 'Analyse IA - Profil Global' : 'Analyse IA - Activité'}
+            </Typography>
+            {!isProfileAnalysis && activityName && (
+              <Typography variant="small" color="gray" className="font-normal">
+                {activityName}
+              </Typography>
+            )}
+          </div>
+        </div>
+        <Button variant="text" color="gray" onClick={onClose} className="p-2">
+          <XMarkIcon className="h-5 w-5" />
+        </Button>
+      </DialogHeader>
+
+      <DialogBody className="max-h-[70vh] overflow-y-auto p-6">
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Spinner className="h-12 w-12 mb-4" color="purple" />
+            <Typography color="gray">
+              {isProfileAnalysis
+                ? 'Analyse de votre profil en cours...'
+                : 'Analyse de votre activité en cours...'}
+            </Typography>
+            <Typography variant="small" color="gray" className="mt-2">
+              Cela peut prendre quelques secondes
+            </Typography>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <Typography color="red" className="font-semibold">
+              Erreur
+            </Typography>
+            <Typography variant="small" color="red">
+              {error}
+            </Typography>
+          </div>
+        )}
+
+        {!loading && !error && analysis && (
+          <div className="prose prose-sm max-w-none">
+            <div className="bg-purple-50 border-l-4 border-purple-600 p-4 mb-4 rounded">
+              <Typography variant="small" color="purple" className="font-semibold flex items-center gap-2">
+                <SparklesIcon className="h-4 w-4" />
+                Coach IA - Analyse stricte et exigeante
+              </Typography>
+              <Typography variant="small" color="gray" className="mt-1">
+                Feedback factuel basé sur vos données réelles
+              </Typography>
+            </div>
+
+            <div className="space-y-1">
+              {formatAnalysis(analysis)}
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && !analysis && (
+          <Typography color="gray" className="text-center py-8">
+            Aucune analyse disponible
+          </Typography>
+        )}
+      </DialogBody>
+
+      <DialogFooter className="border-t border-gray-200">
+        <Button variant="text" color="gray" onClick={onClose}>
+          Fermer
+        </Button>
+        {analysis && (
+          <Button
+            variant="gradient"
+            color="purple"
+            onClick={loadAnalysis}
+            className="flex items-center gap-2"
+          >
+            <SparklesIcon className="h-4 w-4" />
+            Régénérer
+          </Button>
+        )}
+      </DialogFooter>
+    </Dialog>
+  );
+}

@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import FeedWidget from '../components/FeedWidget';
 import EventsWidget from '../components/EventsWidget';
 import ChallengesWidget from '../components/ChallengesWidget';
+import AIAnalysisDialog from '../components/AIAnalysisDialog';
 import {
   Card,
   CardBody,
@@ -12,10 +13,12 @@ import {
   Typography,
   Chip,
   Progress,
+  Button,
 } from "@material-tailwind/react";
 import {
   ChartBarIcon,
 } from "@heroicons/react/24/solid";
+import { SparklesIcon } from "@heroicons/react/24/outline";
 
 export default function Dashboard() {
   const { sportFilter } = useSportFilter();
@@ -25,6 +28,7 @@ export default function Dashboard() {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedBadge, setExpandedBadge] = useState(null);
+  const [showProfileAnalysis, setShowProfileAnalysis] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -85,6 +89,36 @@ export default function Dashboard() {
 
   return (
     <Layout>
+      {/* AI Profile Analysis Card */}
+      <Card className="mb-6 bg-gradient-to-r from-purple-500 to-purple-700 border-0 shadow-lg">
+        <CardBody className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-white/20 p-3">
+                <SparklesIcon className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <Typography variant="h5" color="white" className="font-bold">
+                  Analyse IA de votre profil
+                </Typography>
+                <Typography variant="small" color="white" className="font-normal opacity-90">
+                  Obtenez un feedback strict et personnalisé sur votre progression globale
+                </Typography>
+              </div>
+            </div>
+            <Button
+              size="lg"
+              variant="filled"
+              className="bg-white text-purple-700 hover:bg-gray-100 flex items-center gap-2 normal-case font-semibold"
+              onClick={() => setShowProfileAnalysis(true)}
+            >
+              <SparklesIcon className="h-5 w-5" />
+              Analyser mon profil
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <Card className="border border-gray-200 shadow-none">
@@ -259,6 +293,15 @@ export default function Dashboard() {
           <FeedWidget />
         </div>
       </div>
+
+      {/* AI Profile Analysis Dialog */}
+      <AIAnalysisDialog
+        open={showProfileAnalysis}
+        onClose={() => setShowProfileAnalysis(false)}
+        activityId={null}
+        activityName={null}
+        isProfileAnalysis={true}
+      />
     </Layout>
   );
 }
