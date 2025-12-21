@@ -19,6 +19,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(null);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -50,6 +51,24 @@ export default function Admin() {
       setError('Erreur lors de la mise à jour du rôle');
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const handleSyncAll = async () => {
+    if (!confirm('Voulez-vous synchroniser toutes les activités de tous les utilisateurs ? Cela peut prendre du temps.')) {
+      return;
+    }
+
+    try {
+      setSyncing(true);
+      setError(null);
+      const result = await adminApi.syncAllUsers();
+      alert(`Synchronisation lancée pour ${result.usersCount} utilisateurs (${result.jobsCreated} jobs créés)`);
+    } catch (error) {
+      console.error('Error syncing all users:', error);
+      setError('Erreur lors du lancement de la synchronisation globale');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -89,16 +108,28 @@ export default function Admin() {
           <Typography variant="h4" color="blue-gray">
             Administration
           </Typography>
-          <Button
-            size="sm"
-            color="gray"
-            variant="outlined"
-            onClick={loadUsers}
-            disabled={loading}
-            className="normal-case"
-          >
-            Actualiser
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              color="blue"
+              variant="filled"
+              onClick={handleSyncAll}
+              disabled={syncing}
+              className="normal-case"
+            >
+              {syncing ? 'Synchronisation...' : 'Synchroniser tous les utilisateurs'}
+            </Button>
+            <Button
+              size="sm"
+              color="gray"
+              variant="outlined"
+              onClick={loadUsers}
+              disabled={loading}
+              className="normal-case"
+            >
+              Actualiser
+            </Button>
+          </div>
         </div>
 
         {error && (

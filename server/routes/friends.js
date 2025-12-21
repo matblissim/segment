@@ -1,6 +1,9 @@
 import express from 'express';
 import Friendship from '../models/Friendship.js';
+import Activity from '../models/Activity.js';
+import Event from '../models/Event.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { pool } from '../config/database.js';
 
 const router = express.Router();
 
@@ -25,12 +28,55 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// Obtenir la liste des amis
+// Obtenir la liste des amis avec leurs stats mensuelles
 router.get('/', async (req, res) => {
   try {
     const friends = await Friendship.getFriends(req.userId);
 
-    res.json({ friends });
+    // Pour chaque ami, récupérer ses stats du mois et son prochain événement
+    const friendsWithStats = await Promise.all(
+      friends.map(async (friend) => {
+        // Stats du mois en cours
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const statsResult = await pool.query(
+          `SELECT
+             COALESCE(SUM(distance), 0) as monthly_distance,
+             COALESCE(SUM(total_elevation_gain), 0) as monthly_elevation
+           FROM activities
+           WHERE user_id = $1 AND start_date >= $2`,
+          [friend.id, startOfMonth]
+        );
+
+        const stats = statsResult.rows[0];
+
+        // Prochain événement prioritaire
+        const eventResult = await pool.query(
+          `SELECT e.*, ep.priority,
+             (e.event_date - CURRENT_DATE) as days_until
+           FROM events e
+           JOIN event_participants ep ON e.id = ep.event_id
+           WHERE ep.user_id = $1
+             AND e.event_date >= CURRENT_DATE
+           ORDER BY e.event_date ASC
+           LIMIT 1`,
+          [friend.id]
+        );
+
+        const nextEvent = eventResult.rows[0] || null;
+
+        return {
+          ...friend,
+          monthly_distance: parseFloat(stats.monthly_distance) || 0,
+          monthly_elevation: parseFloat(stats.monthly_elevation) || 0,
+          next_event: nextEvent
+        };
+      })
+    );
+
+    res.json({ friends: friendsWithStats });
   } catch (error) {
     console.error('Error fetching friends:', error);
     res.status(500).json({ error: 'Failed to fetch friends' });

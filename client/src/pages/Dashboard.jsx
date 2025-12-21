@@ -246,13 +246,13 @@ export default function Dashboard() {
           </CardBody>
         </Card>
 
-        {/* Right column: Feed + Events + Challenges */}
+        {/* Right column: Events + Feed + Challenges */}
         <div className="space-y-6">
-          {/* Feed Widget */}
-          <FeedWidget />
-
           {/* Events Widget */}
           <EventsWidget />
+
+          {/* Feed Widget */}
+          <FeedWidget />
 
           {/* Challenges */}
           <Card className="border border-gray-200 shadow-none">

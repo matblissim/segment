@@ -201,6 +201,15 @@ export const adminApi = {
     );
     return response.data;
   },
+
+  syncAllUsers: async () => {
+    const response = await axios.post(
+      `${API_BASE_URL}/admin/sync-all`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
 };
 
 // Friends API (nécessite authentification)

@@ -2,6 +2,7 @@ import express from 'express';
 import User from '../models/User.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { geocodeUserActivities } from '../services/geocoding.js';
+import { syncQueue } from '../workers/syncWorker.js';
 
 const router = express.Router();
 
@@ -79,6 +80,51 @@ router.post('/geocode/:userId', async (req, res) => {
   } catch (error) {
     console.error('Error geocoding activities:', error);
     res.status(500).json({ error: 'Failed to geocode activities' });
+  }
+});
+
+// POST /api/admin/sync-all - Synchroniser toutes les activités de tous les utilisateurs
+router.post('/sync-all', async (req, res) => {
+  try {
+    console.log('🚀 Admin: Démarrage synchronisation globale de tous les utilisateurs');
+
+    // Récupérer tous les utilisateurs
+    const users = await User.findAll();
+
+    // Lancer la synchronisation pour chaque utilisateur
+    const jobs = [];
+    for (const user of users) {
+      try {
+        const job = await syncQueue.add(
+          'sync-user-activities',
+          {
+            userId: user.id,
+            fullSync: false
+          },
+          {
+            attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 2000,
+            },
+          }
+        );
+        jobs.push({ userId: user.id, jobId: job.id });
+        console.log(`✅ Job créé pour ${user.username} (${user.id}): ${job.id}`);
+      } catch (err) {
+        console.error(`❌ Erreur création job pour user ${user.id}:`, err);
+      }
+    }
+
+    res.json({
+      message: 'Synchronisation globale lancée',
+      usersCount: users.length,
+      jobsCreated: jobs.length,
+      jobs
+    });
+  } catch (error) {
+    console.error('Error starting global sync:', error);
+    res.status(500).json({ error: 'Failed to start global sync' });
   }
 });
 
