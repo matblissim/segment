@@ -101,26 +101,32 @@ export default function FriendsLeaderboard() {
             </Typography>
             <ButtonGroup size="sm" fullWidth>
               <Button
-                variant={sportType === 'all' ? 'filled' : 'outlined'}
-                color={sportType === 'all' ? 'green' : 'gray'}
                 onClick={() => setSportType('all')}
-                className="normal-case"
+                className={`normal-case ${
+                  sportType === 'all'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 Tous
               </Button>
               <Button
-                variant={sportType === 'running' ? 'filled' : 'outlined'}
-                color={sportType === 'running' ? 'green' : 'gray'}
                 onClick={() => setSportType('running')}
-                className="normal-case"
+                className={`normal-case ${
+                  sportType === 'running'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 Course
               </Button>
               <Button
-                variant={sportType === 'cycling' ? 'filled' : 'outlined'}
-                color={sportType === 'cycling' ? 'green' : 'gray'}
                 onClick={() => setSportType('cycling')}
-                className="normal-case"
+                className={`normal-case ${
+                  sportType === 'cycling'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 Vélo
               </Button>
@@ -133,26 +139,32 @@ export default function FriendsLeaderboard() {
             </Typography>
             <ButtonGroup size="sm" fullWidth>
               <Button
-                variant={period === 'week' ? 'filled' : 'outlined'}
-                color={period === 'week' ? 'green' : 'gray'}
                 onClick={() => setPeriod('week')}
-                className="normal-case"
+                className={`normal-case ${
+                  period === 'week'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 Semaine
               </Button>
               <Button
-                variant={period === 'month' ? 'filled' : 'outlined'}
-                color={period === 'month' ? 'green' : 'gray'}
                 onClick={() => setPeriod('month')}
-                className="normal-case"
+                className={`normal-case ${
+                  period === 'month'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 Mois
               </Button>
               <Button
-                variant={period === 'year' ? 'filled' : 'outlined'}
-                color={period === 'year' ? 'green' : 'gray'}
                 onClick={() => setPeriod('year')}
-                className="normal-case"
+                className={`normal-case ${
+                  period === 'year'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 Année
               </Button>
@@ -165,18 +177,22 @@ export default function FriendsLeaderboard() {
             </Typography>
             <ButtonGroup size="sm" fullWidth>
               <Button
-                variant={metric === 'distance' ? 'filled' : 'outlined'}
-                color={metric === 'distance' ? 'green' : 'gray'}
                 onClick={() => setMetric('distance')}
-                className="normal-case"
+                className={`normal-case ${
+                  metric === 'distance'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 Km
               </Button>
               <Button
-                variant={metric === 'elevation' ? 'filled' : 'outlined'}
-                color={metric === 'elevation' ? 'green' : 'gray'}
                 onClick={() => setMetric('elevation')}
-                className="normal-case"
+                className={`normal-case ${
+                  metric === 'elevation'
+                    ? 'bg-green-700 text-white hover:bg-green-800'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
               >
                 D+
               </Button>
