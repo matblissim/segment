@@ -1,8 +1,64 @@
-import { Card, CardBody, Typography, Button, Chip } from '@material-tailwind/react';
-import { UserMinusIcon, CheckIcon, XMarkIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { Card, CardBody, Typography, Button, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Input, Select, Option } from '@material-tailwind/react';
+import { UserMinusIcon, CheckIcon, XMarkIcon, CalendarIcon, TrophyIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { challengesApi } from '../services/api';
 
 export default function FriendCard({ friend, type = 'friend', onAction }) {
+  const [showChallengeDialog, setShowChallengeDialog] = useState(false);
+  const [h2hStats, setH2hStats] = useState(null);
+  const [challengeData, setChallengeData] = useState({
+    metric: 'distance',
+    target_value: '',
+    start_date: '',
+    end_date: ''
+  });
   // Type peut être: 'friend', 'pending', 'sent', 'search'
+
+  // Charger les stats H2H pour les amis
+  useEffect(() => {
+    if (type === 'friend' && friend.id) {
+      loadH2HStats();
+    }
+  }, [type, friend.id]);
+
+  const loadH2HStats = async () => {
+    try {
+      const stats = await challengesApi.getH2HStats(friend.id);
+      setH2hStats(stats);
+    } catch (error) {
+      console.error('Error loading H2H stats:', error);
+    }
+  };
+
+  const handleCreateChallenge = async () => {
+    try {
+      const data = {
+        challenged_id: friend.id,
+        metric: challengeData.metric,
+        target_value: challengeData.metric === 'distance'
+          ? parseFloat(challengeData.target_value) * 1000 // Convert km to meters
+          : parseFloat(challengeData.target_value), // D+ already in meters
+        start_date: challengeData.start_date,
+        end_date: challengeData.end_date
+      };
+
+      await challengesApi.createChallenge(data);
+      setShowChallengeDialog(false);
+      setChallengeData({
+        metric: 'distance',
+        target_value: '',
+        start_date: '',
+        end_date: ''
+      });
+
+      if (onAction) {
+        onAction('challengeCreated');
+      }
+    } catch (error) {
+      console.error('Error creating challenge:', error);
+      alert('Erreur lors de la création du challenge');
+    }
+  };
 
   const getInitials = (username) => {
     return username?.substring(0, 2).toUpperCase() || '??';
@@ -12,16 +68,28 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
     switch (type) {
       case 'friend':
         return (
-          <Button
-            size="sm"
-            color="red"
-            variant="text"
-            onClick={() => onAction('remove', friend.id)}
-            className="flex items-center gap-2"
-          >
-            <UserMinusIcon className="h-4 w-4" />
-            Retirer
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              size="sm"
+              color="green"
+              variant="gradient"
+              onClick={() => setShowChallengeDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <TrophyIcon className="h-4 w-4" />
+              Défier
+            </Button>
+            <Button
+              size="sm"
+              color="red"
+              variant="text"
+              onClick={() => onAction('remove', friend.id)}
+              className="flex items-center gap-2"
+            >
+              <UserMinusIcon className="h-4 w-4" />
+              Retirer
+            </Button>
+          </div>
         );
 
       case 'pending':
@@ -116,6 +184,17 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
                 </div>
               )}
 
+              {/* Stats H2H */}
+              {type === 'friend' && h2hStats && (
+                <div className="flex items-center gap-2 mt-2">
+                  <TrophyIcon className="h-4 w-4 text-yellow-700" />
+                  <Typography variant="small" color="blue-gray" className="font-semibold">
+                    H2H: {h2hStats.user1_wins}-{h2hStats.user2_wins}
+                    {parseInt(h2hStats.draws) > 0 && ` (${h2hStats.draws} nuls)`}
+                  </Typography>
+                </div>
+              )}
+
               {/* Prochain événement */}
               {type === 'friend' && friend.next_event && (
                 <div className="flex items-center gap-2 mt-2">
@@ -138,6 +217,61 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
           </div>
         </div>
       </CardBody>
+
+      {/* Dialog de création de challenge */}
+      <Dialog open={showChallengeDialog} handler={setShowChallengeDialog}>
+        <DialogHeader>Défier {friend.username || friend.friend_username}</DialogHeader>
+        <DialogBody className="space-y-4">
+          <div>
+            <Typography variant="small" color="blue-gray" className="mb-2 font-semibold">
+              Type de challenge
+            </Typography>
+            <Select
+              label="Métrique"
+              value={challengeData.metric}
+              onChange={(val) => setChallengeData({ ...challengeData, metric: val })}
+            >
+              <Option value="distance">Distance (km)</Option>
+              <Option value="elevation">Dénivelé (m D+)</Option>
+            </Select>
+          </div>
+
+          <Input
+            type="number"
+            label={challengeData.metric === 'distance' ? 'Objectif (km)' : 'Objectif (m D+)'}
+            value={challengeData.target_value}
+            onChange={(e) => setChallengeData({ ...challengeData, target_value: e.target.value })}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              type="date"
+              label="Date de début"
+              value={challengeData.start_date}
+              onChange={(e) => setChallengeData({ ...challengeData, start_date: e.target.value })}
+            />
+            <Input
+              type="date"
+              label="Date de fin"
+              value={challengeData.end_date}
+              onChange={(e) => setChallengeData({ ...challengeData, end_date: e.target.value })}
+            />
+          </div>
+        </DialogBody>
+        <DialogFooter className="gap-2">
+          <Button variant="text" color="red" onClick={() => setShowChallengeDialog(false)}>
+            Annuler
+          </Button>
+          <Button
+            variant="gradient"
+            color="green"
+            onClick={handleCreateChallenge}
+            disabled={!challengeData.target_value || !challengeData.start_date || !challengeData.end_date}
+          >
+            Créer le challenge
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </Card>
   );
 }

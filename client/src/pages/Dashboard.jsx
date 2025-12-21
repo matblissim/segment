@@ -4,6 +4,7 @@ import { useSportFilter } from '../contexts/SportFilterContext';
 import Layout from '../components/Layout';
 import FeedWidget from '../components/FeedWidget';
 import EventsWidget from '../components/EventsWidget';
+import ChallengesWidget from '../components/ChallengesWidget';
 import {
   Card,
   CardBody,
@@ -251,54 +252,11 @@ export default function Dashboard() {
           {/* Events Widget */}
           <EventsWidget />
 
+          {/* Challenges Widget */}
+          <ChallengesWidget />
+
           {/* Feed Widget */}
           <FeedWidget />
-
-          {/* Challenges */}
-          <Card className="border border-gray-200 shadow-none">
-            <CardHeader
-              floated={false}
-              shadow={false}
-              color="transparent"
-              className="m-0 p-6 border-b border-gray-200"
-            >
-              <Typography variant="h6" color="blue-gray">
-                Challenges
-              </Typography>
-            </CardHeader>
-            <CardBody className="pt-4">
-              {challenges.length > 0 ? (
-                <div className="space-y-4">
-                  {challenges.slice(0, 3).map((challenge) => (
-                    <div key={challenge.id}>
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <Typography variant="small" color="blue-gray" className="font-semibold">
-                            {challenge.name}
-                          </Typography>
-                          <Typography variant="small" color="gray">
-                            +{challenge.reward} points
-                          </Typography>
-                        </div>
-                        <Typography variant="small" color="blue-gray" className="font-semibold">
-                          {Number(challenge.progress || 0).toFixed(0)}%
-                        </Typography>
-                      </div>
-                      <Progress
-                        value={Math.min(challenge.progress || 0, 100)}
-                        color="gray"
-                        className="h-2"
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Typography variant="small" color="gray" className="text-center py-8">
-                  Aucun challenge actif
-                </Typography>
-              )}
-            </CardBody>
-          </Card>
         </div>
       </div>
     </Layout>
