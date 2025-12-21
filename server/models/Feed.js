@@ -2,14 +2,29 @@ import { pool } from '../config/database.js';
 
 class Feed {
   /**
-   * Obtenir le feed d'un utilisateur (ses activités + celles de ses amis)
+   * Obtenir le feed d'un utilisateur (ses activités + celles de ses amis + badges)
    */
   static async getUserFeed(userId, limit = 50, offset = 0) {
     const result = await pool.query(
-      'SELECT * FROM get_user_feed($1, $2, $3)',
+      'SELECT * FROM get_user_feed_with_badges($1, $2, $3)',
       [userId, limit, offset]
     );
     return result.rows;
+  }
+
+  /**
+   * Enregistrer un achievement de badge
+   */
+  static async recordBadgeAchievement(userId, badge, sportType, activityId = null) {
+    const result = await pool.query(
+      `INSERT INTO badge_achievements (user_id, badge_id, badge_name, badge_description, sport_type, activity_id, count)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (user_id, badge_id)
+       DO UPDATE SET count = badge_achievements.count + 1, created_at = NOW()
+       RETURNING *`,
+      [userId, badge.id, badge.name, badge.description, sportType, activityId, badge.count || 1]
+    );
+    return result.rows[0];
   }
 
   /**

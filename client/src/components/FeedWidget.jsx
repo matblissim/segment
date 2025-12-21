@@ -30,6 +30,8 @@ export default function FeedWidget() {
   };
 
   const handleLike = async (activityId, currentlyLiked) => {
+    if (!activityId) return; // Skip pour les badges
+
     try {
       if (currentlyLiked) {
         await feedApi.unlikeActivity(activityId);
@@ -37,17 +39,17 @@ export default function FeedWidget() {
         await feedApi.likeActivity(activityId);
       }
 
-      setActivities(activities.map(activity => {
-        if (activity.strava_activity_id === activityId) {
+      setActivities(activities.map(item => {
+        if (item.item_type === 'activity' && item.strava_activity_id === activityId) {
           return {
-            ...activity,
+            ...item,
             user_has_liked: !currentlyLiked,
             likes_count: currentlyLiked
-              ? (activity.likes_count || 0) - 1
-              : (activity.likes_count || 0) + 1
+              ? (item.likes_count || 0) - 1
+              : (item.likes_count || 0) + 1
           };
         }
-        return activity;
+        return item;
       }));
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -128,53 +130,74 @@ export default function FeedWidget() {
       <CardBody className="pt-4">
         {activities.length > 0 ? (
           <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-            {activities.map((activity) => (
-              <div key={activity.strava_activity_id} className="border-b border-gray-100 pb-4 last:border-0">
+            {activities.map((item) => (
+              <div key={`${item.item_type}-${item.id}`} className="border-b border-gray-100 pb-4 last:border-0">
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold">
-                    {getUserInitials(activity.username)}
+                    {getUserInitials(item.username)}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <Typography variant="small" color="blue-gray" className="font-semibold">
-                        {activity.username}
+                        {item.username}
                       </Typography>
                       <Typography variant="small" color="gray" className="text-xs">
-                        {getRelativeTime(activity.start_date)}
+                        {getRelativeTime(item.created_at)}
                       </Typography>
                     </div>
 
-                    <Typography variant="small" color="blue-gray" className="mb-2">
-                      {activity.name}
-                    </Typography>
+                    {item.item_type === 'activity' ? (
+                      <>
+                        <Typography variant="small" color="blue-gray" className="mb-2">
+                          {item.name}
+                        </Typography>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-600">
-                      <span>{formatDistance(activity.distance)} km</span>
-                      <span>{formatDuration(activity.moving_time)}</span>
-                      {activity.total_elevation_gain > 0 && (
-                        <span>↑ {Math.round(activity.total_elevation_gain)}m</span>
-                      )}
-                    </div>
+                        <div className="flex items-center gap-4 text-xs text-gray-600">
+                          <span>{formatDistance(item.distance)} km</span>
+                          <span>{formatDuration(item.moving_time)}</span>
+                          {item.total_elevation_gain > 0 && (
+                            <span>↑ {Math.round(item.total_elevation_gain)}m</span>
+                          )}
+                        </div>
 
-                    <div className="flex items-center gap-4 mt-2">
-                      <button
-                        onClick={() => handleLike(activity.strava_activity_id, activity.user_has_liked)}
-                        className="flex items-center gap-1 text-xs text-gray-600 hover:text-red-500 transition-colors"
-                      >
-                        {activity.user_has_liked ? (
-                          <HeartSolidIcon className="h-4 w-4 text-red-500" />
-                        ) : (
-                          <HeartIcon className="h-4 w-4" />
-                        )}
-                        <span>{activity.likes_count || 0}</span>
-                      </button>
+                        <div className="flex items-center gap-4 mt-2">
+                          <button
+                            onClick={() => handleLike(item.strava_activity_id, item.user_has_liked)}
+                            className="flex items-center gap-1 text-xs text-gray-600 hover:text-red-500 transition-colors"
+                          >
+                            {item.user_has_liked ? (
+                              <HeartSolidIcon className="h-4 w-4 text-red-500" />
+                            ) : (
+                              <HeartIcon className="h-4 w-4" />
+                            )}
+                            <span>{item.likes_count || 0}</span>
+                          </button>
 
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <ChatBubbleLeftIcon className="h-4 w-4" />
-                        <span>{activity.comments_count || 0}</span>
-                      </div>
-                    </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-600">
+                            <ChatBubbleLeftIcon className="h-4 w-4" />
+                            <span>{item.comments_count || 0}</span>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-lg">🏆</span>
+                          <Typography variant="small" color="blue-gray" className="font-semibold">
+                            a débloqué un badge !
+                          </Typography>
+                        </div>
+                        <div className="bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                          <Typography variant="small" color="blue-gray" className="font-semibold">
+                            {item.badge_name} {item.badge_count > 1 && `×${item.badge_count}`}
+                          </Typography>
+                          <Typography variant="small" color="gray" className="text-xs">
+                            {item.badge_description}
+                          </Typography>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

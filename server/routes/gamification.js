@@ -1,5 +1,6 @@
 import express from 'express';
 import Activity from '../models/Activity.js';
+import Feed from '../models/Feed.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -277,6 +278,28 @@ router.post('/calculate-stats', authenticateToken, async (req, res) => {
   const runningBadges = calculateBadges(RUNNING_BADGES, RUNNING_TYPES);
   const cyclingBadges = calculateBadges(CYCLING_BADGES, CYCLING_TYPES);
   const allBadges = [...runningBadges, ...cyclingBadges];
+
+  // Enregistrer les badges obtenus dans le feed
+  try {
+    for (const badge of allBadges) {
+      if (badge.earned && badge.count > 0) {
+        const sportType = RUNNING_BADGES.some(b => b.id === badge.id) ? 'running' : 'cycling';
+        const latestActivity = badge.activities && badge.activities.length > 0
+          ? badge.activities[badge.activities.length - 1]
+          : null;
+
+        await Feed.recordBadgeAchievement(
+          req.userId,
+          badge,
+          sportType,
+          latestActivity?.id || null
+        );
+      }
+    }
+  } catch (badgeError) {
+    console.error('Error recording badge achievements:', badgeError);
+    // Continue même en cas d'erreur
+  }
 
   // Calculer la progression des challenges
   const challengeProgress = CHALLENGES.map(challenge => {
