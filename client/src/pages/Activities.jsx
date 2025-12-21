@@ -2,17 +2,22 @@ import { useState, useEffect } from 'react';
 import { activitiesApi } from '../services/api';
 import { useSportFilter } from '../contexts/SportFilterContext';
 import Layout from '../components/Layout';
+import AIAnalysisDialog from '../components/AIAnalysisDialog';
 import {
   Card,
   CardBody,
   Typography,
   Chip,
+  Button,
 } from "@material-tailwind/react";
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 export default function Activities() {
   const { sportFilter } = useSportFilter();
   const [allActivities, setAllActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [showAIAnalysis, setShowAIAnalysis] = useState(false);
 
   useEffect(() => {
     loadActivities();
@@ -132,6 +137,22 @@ export default function Activities() {
                       </Typography>
                     </div>
                   </div>
+
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <Button
+                      variant="gradient"
+                      color="purple"
+                      size="sm"
+                      className="flex items-center gap-2 normal-case"
+                      onClick={() => {
+                        setSelectedActivity(activity);
+                        setShowAIAnalysis(true);
+                      }}
+                    >
+                      <SparklesIcon className="h-4 w-4" />
+                      Analyse IA
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardBody>
@@ -148,6 +169,18 @@ export default function Activities() {
           </CardBody>
         </Card>
       )}
+
+      {/* AI Analysis Dialog */}
+      <AIAnalysisDialog
+        open={showAIAnalysis}
+        onClose={() => {
+          setShowAIAnalysis(false);
+          setSelectedActivity(null);
+        }}
+        activityId={selectedActivity?.strava_id}
+        activityName={selectedActivity?.name}
+        isProfileAnalysis={false}
+      />
     </Layout>
   );
 }
