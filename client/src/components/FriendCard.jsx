@@ -15,14 +15,15 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
 
   // Charger les stats H2H pour les amis
   useEffect(() => {
-    if (type === 'friend' && friend.id) {
+    if (type === 'friend' && (friend.friend_id || friend.id)) {
       loadH2HStats();
     }
-  }, [type, friend.id]);
+  }, [type, friend.friend_id, friend.id]);
 
   const loadH2HStats = async () => {
     try {
-      const stats = await challengesApi.getH2HStats(friend.id);
+      const friendId = friend.friend_id || friend.id; // friend_id pour les amis, id pour les recherches
+      const stats = await challengesApi.getH2HStats(friendId);
       setH2hStats(stats);
     } catch (error) {
       console.error('Error loading H2H stats:', error);
@@ -31,8 +32,9 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
 
   const handleCreateChallenge = async () => {
     try {
+      const friendId = friend.friend_id || friend.id; // friend_id pour les amis, id pour les recherches
       const data = {
-        challenged_id: friend.id,
+        challenged_id: friendId,
         metric: challengeData.metric,
         target_value: challengeData.metric === 'distance'
           ? parseFloat(challengeData.target_value) * 1000 // Convert km to meters
