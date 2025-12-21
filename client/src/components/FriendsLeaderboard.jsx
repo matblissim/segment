@@ -4,8 +4,8 @@ import {
   CardHeader,
   CardBody,
   Typography,
-  Select,
-  Option,
+  ButtonGroup,
+  Button,
   Chip,
   Spinner,
 } from '@material-tailwind/react';
@@ -47,18 +47,18 @@ export default function FriendsLeaderboard() {
   const getPeriodLabel = () => {
     switch (period) {
       case 'week':
-        return 'Cette semaine';
+        return 'Semaine';
       case 'month':
-        return 'Ce mois';
+        return 'Mois';
       case 'year':
-        return 'Cette année';
+        return 'Année';
       default:
         return '';
     }
   };
 
   const getMetricLabel = () => {
-    return metric === 'distance' ? 'Kilométrage' : 'D+';
+    return metric === 'distance' ? 'Km' : 'D+';
   };
 
   const getMedalColor = (rank) => {
@@ -94,26 +94,61 @@ export default function FriendsLeaderboard() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <Select
-            label="Période"
-            value={period}
-            onChange={(val) => setPeriod(val)}
-            size="md"
-          >
-            <Option value="week">Semaine</Option>
-            <Option value="month">Mois</Option>
-            <Option value="year">Année</Option>
-          </Select>
+          <div>
+            <Typography variant="small" color="gray" className="mb-2 font-medium">
+              Période
+            </Typography>
+            <ButtonGroup size="sm" fullWidth>
+              <Button
+                variant={period === 'week' ? 'filled' : 'outlined'}
+                color="blue-gray"
+                onClick={() => setPeriod('week')}
+                className="normal-case"
+              >
+                Semaine
+              </Button>
+              <Button
+                variant={period === 'month' ? 'filled' : 'outlined'}
+                color="blue-gray"
+                onClick={() => setPeriod('month')}
+                className="normal-case"
+              >
+                Mois
+              </Button>
+              <Button
+                variant={period === 'year' ? 'filled' : 'outlined'}
+                color="blue-gray"
+                onClick={() => setPeriod('year')}
+                className="normal-case"
+              >
+                Année
+              </Button>
+            </ButtonGroup>
+          </div>
 
-          <Select
-            label="Métrique"
-            value={metric}
-            onChange={(val) => setMetric(val)}
-            size="md"
-          >
-            <Option value="distance">Kilométrage</Option>
-            <Option value="elevation">D+</Option>
-          </Select>
+          <div>
+            <Typography variant="small" color="gray" className="mb-2 font-medium">
+              Métrique
+            </Typography>
+            <ButtonGroup size="sm" fullWidth>
+              <Button
+                variant={metric === 'distance' ? 'filled' : 'outlined'}
+                color="blue-gray"
+                onClick={() => setMetric('distance')}
+                className="normal-case"
+              >
+                Km
+              </Button>
+              <Button
+                variant={metric === 'elevation' ? 'filled' : 'outlined'}
+                color="blue-gray"
+                onClick={() => setMetric('elevation')}
+                className="normal-case"
+              >
+                D+
+              </Button>
+            </ButtonGroup>
+          </div>
         </div>
       </CardHeader>
 
@@ -141,10 +176,14 @@ export default function FriendsLeaderboard() {
                 {getPeriodLabel()} - {getMetricLabel()}
               </Typography>
             </div>
-            {leaderboard.map((friend, index) => (
+            {leaderboard.map((user, index) => (
               <div
-                key={friend.friend_id}
-                className="px-4 py-3 hover:bg-gray-50 transition-colors"
+                key={user.user_id}
+                className={`px-4 py-3 transition-colors ${
+                  user.is_current_user
+                    ? 'bg-blue-50 border-l-4 border-blue-500'
+                    : 'hover:bg-gray-50'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="flex-shrink-0 w-8 text-center">
@@ -162,16 +201,30 @@ export default function FriendsLeaderboard() {
                     )}
                   </div>
 
-                  <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                    {getInitials(friend.friend_username)}
+                  <div className={`w-10 h-10 rounded-full ${
+                    user.is_current_user ? 'bg-blue-600' : 'bg-blue-500'
+                  } text-white flex items-center justify-center font-semibold text-sm flex-shrink-0`}>
+                    {getInitials(user.username)}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <Typography variant="small" color="blue-gray" className="font-semibold truncate">
-                      {friend.friend_username}
-                    </Typography>
+                    <div className="flex items-center gap-2">
+                      <Typography variant="small" color="blue-gray" className={`truncate ${
+                        user.is_current_user ? 'font-bold' : 'font-semibold'
+                      }`}>
+                        {user.username}
+                      </Typography>
+                      {user.is_current_user && (
+                        <Chip
+                          value="Vous"
+                          size="sm"
+                          color="blue"
+                          className="px-2 py-0"
+                        />
+                      )}
+                    </div>
                     <Typography variant="small" color="gray" className="truncate">
-                      {formatValue(friend.value)}
+                      {formatValue(user.value)}
                     </Typography>
                   </div>
                 </div>

@@ -237,8 +237,30 @@ router.get('/leaderboard', async (req, res) => {
     // Récupérer les amis
     const friends = await Friendship.getFriends(req.userId);
 
+    // Récupérer aussi l'utilisateur actuel
+    const currentUserResult = await pool.query(
+      `SELECT id, username, strava_id FROM users WHERE id = $1`,
+      [req.userId]
+    );
+    const currentUser = currentUserResult.rows[0];
+
+    // Calculer les stats pour l'utilisateur actuel
+    const currentUserStatsResult = await pool.query(
+      `SELECT
+         COALESCE(SUM(distance), 0) as total_distance,
+         COALESCE(SUM(total_elevation_gain), 0) as total_elevation
+       FROM activities
+       WHERE user_id = $1 AND start_date >= $2`,
+      [req.userId, startDate]
+    );
+
+    const currentUserStats = currentUserStatsResult.rows[0];
+    const currentUserValue = metric === 'distance'
+      ? parseFloat(currentUserStats.total_distance) || 0
+      : parseFloat(currentUserStats.total_elevation) || 0;
+
     // Pour chaque ami, calculer la métrique demandée
-    const leaderboard = await Promise.all(
+    const friendsLeaderboard = await Promise.all(
       friends.map(async (friend) => {
         const statsResult = await pool.query(
           `SELECT
@@ -255,15 +277,30 @@ router.get('/leaderboard', async (req, res) => {
           : parseFloat(stats.total_elevation) || 0;
 
         return {
-          friend_id: friend.friend_id,
-          friend_username: friend.friend_username,
-          friend_strava_id: friend.friend_strava_id,
+          user_id: friend.friend_id,
+          username: friend.friend_username,
+          strava_id: friend.friend_strava_id,
           value: value,
           distance: parseFloat(stats.total_distance) || 0,
-          elevation: parseFloat(stats.total_elevation) || 0
+          elevation: parseFloat(stats.total_elevation) || 0,
+          is_current_user: false
         };
       })
     );
+
+    // Ajouter l'utilisateur actuel au classement
+    const leaderboard = [
+      ...friendsLeaderboard,
+      {
+        user_id: currentUser.id,
+        username: currentUser.username,
+        strava_id: currentUser.strava_id,
+        value: currentUserValue,
+        distance: parseFloat(currentUserStats.total_distance) || 0,
+        elevation: parseFloat(currentUserStats.total_elevation) || 0,
+        is_current_user: true
+      }
+    ];
 
     // Trier par valeur décroissante
     leaderboard.sort((a, b) => b.value - a.value);
