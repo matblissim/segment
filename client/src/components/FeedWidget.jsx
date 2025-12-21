@@ -20,7 +20,7 @@ export default function FeedWidget() {
 
   const loadFeed = async () => {
     try {
-      const data = await feedApi.getFeed(5, 0); // Seulement 5 activités récentes
+      const data = await feedApi.getFeed(20, 0); // 20 activités avec scroll
       setActivities(data.activities || []);
     } catch (error) {
       console.error('Error loading feed:', error);
@@ -127,7 +127,7 @@ export default function FeedWidget() {
       </CardHeader>
       <CardBody className="pt-4">
         {activities.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
             {activities.map((activity) => (
               <div key={activity.strava_activity_id} className="border-b border-gray-100 pb-4 last:border-0">
                 <div className="flex items-start gap-3">
