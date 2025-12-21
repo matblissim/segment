@@ -101,14 +101,35 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT
-        fa.*,
+        a.id,
+        a.strava_id as strava_activity_id,
+        a.user_id,
+        u.username,
+        u.strava_id,
+        a.name,
+        a.type,
+        a.sport_type,
+        a.distance,
+        a.moving_time,
+        a.elapsed_time,
+        a.total_elevation_gain,
+        a.start_date,
+        a.average_speed,
+        a.max_speed,
+        a.average_heartrate,
+        a.max_heartrate,
+        a.kudos_count,
+        (SELECT COUNT(*)::BIGINT FROM activity_likes WHERE activity_id = a.strava_id) as likes_count,
+        (SELECT COUNT(*)::BIGINT FROM activity_comments WHERE activity_id = a.strava_id) as comments_count,
         EXISTS(
             SELECT 1 FROM activity_likes
-            WHERE activity_id = fa.strava_activity_id
+            WHERE activity_id = a.strava_id
             AND user_id = p_user_id
-        ) as user_has_liked
-    FROM feed_activities fa
-    WHERE fa.user_id IN (
+        ) as user_has_liked,
+        a.created_at
+    FROM activities a
+    JOIN users u ON a.user_id = u.id
+    WHERE a.user_id IN (
         -- Amis de l'utilisateur
         SELECT friend_id FROM friendships
         WHERE user_id = p_user_id AND status = 'accepted'
@@ -119,7 +140,7 @@ BEGIN
         -- L'utilisateur lui-même
         SELECT p_user_id
     )
-    ORDER BY fa.start_date DESC
+    ORDER BY a.start_date DESC
     LIMIT p_limit
     OFFSET p_offset;
 END;
