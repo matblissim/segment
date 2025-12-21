@@ -45,8 +45,9 @@ router.post('/', async (req, res) => {
   try {
     const { challenged_id, metric, target_value, start_date, end_date } = req.body;
 
-    if (!challenged_id || !metric || !target_value || !start_date || !end_date) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    // end_date est optionnel - sera auto-généré si non fourni
+    if (!challenged_id || !metric || !target_value || !start_date) {
+      return res.status(400).json({ error: 'Missing required fields: challenged_id, metric, target_value, start_date' });
     }
 
     if (!['distance', 'elevation'].includes(metric)) {
@@ -59,7 +60,7 @@ router.post('/', async (req, res) => {
       metric,
       target_value,
       start_date,
-      end_date
+      end_date // Optionnel, Challenge.create() va générer si null/undefined
     );
 
     res.json({ challenge });
