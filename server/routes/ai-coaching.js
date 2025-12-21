@@ -167,38 +167,64 @@ router.post('/analyze-activity/:activityId', async (req, res) => {
       }
     };
 
-    // 6. Prompt pour Claude (COACH DUR ET EXIGEANT)
-    const prompt = `Tu es un coach de course à pied EXIGEANT et STRICT. Tu ne fais PAS de compliments gratuits. Tu analyses les données factuellement et tu donnes un feedback DIRECT et HONNÊTE.
+    // 6. Prompt pour Claude (COACH ULTRA-EXIGEANT)
+    const prompt = `Tu es le MEILLEUR coach de course à pied au monde. EXIGEANT, STRICT, ULTRA-ANALYTIQUE. Pas de compliments gratuits, seulement la VÉRITÉ.
 
 DONNÉES DE LA SÉANCE :
 ${JSON.stringify(activityData, null, 2)}
 
-TON RÔLE :
-- Analyse SANS COMPLAISANCE
-- Détecte les erreurs, les faiblesses, les incohérences
-- Compare avec l'historique des 30 derniers jours
-- Identifie si le coureur en fait TROP ou PAS ASSEZ
-- Donne des conseils CONCRETS et EXIGEANTS
+TON RÔLE DE COACH EXPERT :
+- Analyse ULTRA-PROFONDE de chaque métrique
+- Détecte TOUTES les erreurs tactiques et physiologiques
+- Compare avec l'historique : cette séance s'inscrit comment dans la progression ?
+- Identifie surcharge, sous-régime, erreurs de gestion
+- Conseils CONCRETS et APPLICABLES immédiatement
 
-ANALYSE OBLIGATOIRE :
-1. **Gestion de l'allure** : Splits réguliers ou n'importe quoi ? Départ trop rapide ?
-2. **Cardio** : Zones adaptées ? Dérive cardiaque ? Effort cohérent ?
-3. **Volume/Intensité** : Par rapport à l'historique, c'est cohérent ou aberrant ?
-4. **Points à améliorer** : Sois DIRECT. Pas de "c'est pas mal", dis ce qui ne va PAS.
-5. **Prochaine séance** : Consignes PRÉCISES et STRICTES.
+ANALYSE OBLIGATOIRE DÉTAILLÉE :
 
-FORMAT DE RÉPONSE :
-- Utilise des bullets points
-- Sois CONCIS et FACTUEL
-- Pas de "bravo", "félicitations", etc.
-- Si c'est mauvais, DIS-LE clairement
+1. **GESTION DE L'ALLURE** (analyse split par split) :
+   - Régularité : écart-type des splits acceptable ou catastrophique ?
+   - Départ : trop rapide (splits décroissants) ou bien géré ?
+   - Gestion du dénivelé : adaptation en montée/descente cohérente ?
+   - Verdict : allure maîtrisée OU course n'importe comment ?
+
+2. **ANALYSE CARDIAQUE** (zones, dérive, cohérence) :
+   - Distribution zones FC : adaptée à l'objectif (endurance Z2 ? tempo Z3-Z4 ?) ?
+   - Dérive cardiaque détectée : fatigue musculaire, déshydratation, effort trop long ?
+   - FC cohérente avec allure : économie de course bonne ou mauvaise ?
+   - Zones HR suspectes : trop de temps en zone rouge = surentraînement ?
+
+3. **CONTEXTE & CHARGE** (par rapport à l'historique 30j) :
+   - Volume de cette séance vs moyenne habituelle : cohérent ?
+   - Après une grosse semaine ou période de repos ? Timing intelligent ?
+   - Intensité : trop poussée pour le niveau actuel ?
+   - Cette séance = progression logique OU erreur tactique ?
+
+4. **POINTS FAIBLES & ERREURS** (sois IMPITOYABLE) :
+   - Erreurs techniques détectées (allure, FC, gestion)
+   - Manques identifiés (pas assez de D+, trop de plat, pas varié)
+   - Risques à court terme : blessure, fatigue, surentraînement
+   - Ce qui DOIT changer pour la prochaine fois
+
+5. **CONSIGNES POUR LA SUITE** (PRÉCISES) :
+   - Prochaine séance : type, durée, allure cible, zones FC
+   - Récupération nécessaire : jours de repos, séance légère
+   - Interdictions : ce qu'il NE FAUT PAS faire
+   - Objectif : où aller dans les 2 prochaines semaines
+
+RÈGLES ABSOLUES :
+- Sois FACTUEL et CHIFFRÉ (pas de "pas mal", donne des chiffres)
+- Si c'est mauvais, DIS-LE sans détour
+- Si c'est bon, ok, mais explique POURQUOI
+- Pas de "bravo" ou "félicitations" vides
+- Analyse INTELLIGENTE : cherche les CAUSES derrière les chiffres
 
 ANALYSE :`;
 
     // 7. Appeler Claude
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1500,
+      max_tokens: 2500,
       temperature: 0.7,
       messages: [
         {
@@ -234,134 +260,178 @@ router.post('/analyze-profile', async (req, res) => {
   try {
     const userId = req.userId;
 
-    // Récupérer les stats de différentes périodes
+    // Récupérer les 60 dernières activités pour analyse de tendance
+    const allActivitiesResult = await pool.query(`
+      SELECT
+        start_date,
+        type,
+        sport_type,
+        distance/1000 as distance_km,
+        moving_time/3600 as duration_hours,
+        total_elevation_gain,
+        average_heartrate,
+        name
+      FROM activities
+      WHERE user_id = $1
+      ORDER BY start_date DESC
+      LIMIT 60
+    `, [userId]);
+
+    const allActivities = allActivitiesResult.rows;
+
+    // Séparer CAP et Vélo
+    const RUNNING_TYPES = ['Run', 'TrailRun', 'VirtualRun', 'Trail'];
+    const CYCLING_TYPES = ['Ride', 'VirtualRide', 'EBikeRide'];
+
+    const runActivities = allActivities.filter(a => RUNNING_TYPES.includes(a.type));
+    const rideActivities = allActivities.filter(a => CYCLING_TYPES.includes(a.type));
+
+    // Calculer la charge par semaine (4 dernières semaines)
     const now = new Date();
+    const weeklyLoads = [];
+
+    for (let week = 0; week < 4; week++) {
+      const weekStart = new Date(now.getTime() - (week + 1) * 7 * 24 * 60 * 60 * 1000);
+      const weekEnd = new Date(now.getTime() - week * 7 * 24 * 60 * 60 * 1000);
+
+      const weekRuns = runActivities.filter(a => {
+        const date = new Date(a.start_date);
+        return date >= weekStart && date < weekEnd;
+      });
+
+      const weekRides = rideActivities.filter(a => {
+        const date = new Date(a.start_date);
+        return date >= weekStart && date < weekEnd;
+      });
+
+      weeklyLoads.unshift({
+        week: `S-${4-week}`,
+        runs: {
+          count: weekRuns.length,
+          km: weekRuns.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1),
+          hours: weekRuns.reduce((sum, a) => sum + parseFloat(a.duration_hours || 0), 0).toFixed(1),
+          d_plus: weekRuns.reduce((sum, a) => sum + parseFloat(a.total_elevation_gain || 0), 0).toFixed(0)
+        },
+        rides: {
+          count: weekRides.length,
+          km: weekRides.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1),
+          hours: weekRides.reduce((sum, a) => sum + parseFloat(a.duration_hours || 0), 0).toFixed(1)
+        }
+      });
+    }
+
+    // Stats 7j, 30j, 1an - SÉPARÉES par sport
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
-    const [week, month, year, allTime] = await Promise.all([
-      pool.query(`
-        SELECT
-          COUNT(*) as count,
-          SUM(distance)/1000 as total_km,
-          SUM(total_elevation_gain) as total_d_plus,
-          SUM(moving_time)/3600 as total_hours,
-          AVG(average_heartrate) as avg_hr
-        FROM activities WHERE user_id = $1 AND start_date >= $2
-      `, [userId, sevenDaysAgo]),
-      pool.query(`
-        SELECT
-          COUNT(*) as count,
-          SUM(distance)/1000 as total_km,
-          SUM(total_elevation_gain) as total_d_plus,
-          SUM(moving_time)/3600 as total_hours,
-          AVG(average_heartrate) as avg_hr
-        FROM activities WHERE user_id = $1 AND start_date >= $2
-      `, [userId, thirtyDaysAgo]),
-      pool.query(`
-        SELECT
-          COUNT(*) as count,
-          SUM(distance)/1000 as total_km,
-          SUM(total_elevation_gain) as total_d_plus,
-          SUM(moving_time)/3600 as total_hours,
-          AVG(average_heartrate) as avg_hr
-        FROM activities WHERE user_id = $1 AND start_date >= $2
-      `, [userId, oneYearAgo]),
-      pool.query(`
-        SELECT
-          COUNT(*) as count,
-          SUM(distance)/1000 as total_km,
-          SUM(total_elevation_gain) as total_d_plus,
-          SUM(moving_time)/3600 as total_hours
-        FROM activities WHERE user_id = $1
-      `, [userId])
-    ]);
+    const runs7d = runActivities.filter(a => new Date(a.start_date) >= sevenDaysAgo);
+    const runs30d = runActivities.filter(a => new Date(a.start_date) >= thirtyDaysAgo);
+    const runs365d = runActivities.filter(a => new Date(a.start_date) >= oneYearAgo);
 
-    // Récupérer les 5 dernières activités
-    const recentActivities = await pool.query(`
-      SELECT name, start_date, distance/1000 as distance_km, moving_time/60 as duration_min,
-             total_elevation_gain, average_heartrate, type
-      FROM activities
-      WHERE user_id = $1
-      ORDER BY start_date DESC
-      LIMIT 5
-    `, [userId]);
+    const rides7d = rideActivities.filter(a => new Date(a.start_date) >= sevenDaysAgo);
+    const rides30d = rideActivities.filter(a => new Date(a.start_date) >= thirtyDaysAgo);
+    const rides365d = rideActivities.filter(a => new Date(a.start_date) >= oneYearAgo);
 
     const profileData = {
-      stats_7d: {
-        activities: parseInt(week.rows[0].count),
-        km: parseFloat(week.rows[0].total_km || 0).toFixed(1),
-        d_plus: parseFloat(week.rows[0].total_d_plus || 0).toFixed(0),
-        hours: parseFloat(week.rows[0].total_hours || 0).toFixed(1),
-        avg_hr: Math.round(parseFloat(week.rows[0].avg_hr || 0))
+      running: {
+        week: {
+          count: runs7d.length,
+          km: runs7d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1),
+          hours: runs7d.reduce((sum, a) => sum + parseFloat(a.duration_hours || 0), 0).toFixed(1),
+          d_plus: runs7d.reduce((sum, a) => sum + parseFloat(a.total_elevation_gain || 0), 0).toFixed(0)
+        },
+        month: {
+          count: runs30d.length,
+          km: runs30d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1),
+          hours: runs30d.reduce((sum, a) => sum + parseFloat(a.duration_hours || 0), 0).toFixed(1)
+        },
+        year: {
+          count: runs365d.length,
+          km: runs365d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1)
+        },
+        recent: runActivities.slice(0, 10).map(a => ({
+          date: a.start_date,
+          km: parseFloat(a.distance_km).toFixed(1),
+          d_plus: a.total_elevation_gain,
+          hr: a.average_heartrate
+        }))
       },
-      stats_30d: {
-        activities: parseInt(month.rows[0].count),
-        km: parseFloat(month.rows[0].total_km || 0).toFixed(1),
-        d_plus: parseFloat(month.rows[0].total_d_plus || 0).toFixed(0),
-        hours: parseFloat(month.rows[0].total_hours || 0).toFixed(1),
-        avg_hr: Math.round(parseFloat(month.rows[0].avg_hr || 0))
+      cycling: {
+        week: {
+          count: rides7d.length,
+          km: rides7d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1),
+          hours: rides7d.reduce((sum, a) => sum + parseFloat(a.duration_hours || 0), 0).toFixed(1)
+        },
+        month: {
+          count: rides30d.length,
+          km: rides30d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1)
+        },
+        year: {
+          count: rides365d.length,
+          km: rides365d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1)
+        }
       },
-      stats_365d: {
-        activities: parseInt(year.rows[0].count),
-        km: parseFloat(year.rows[0].total_km || 0).toFixed(1),
-        d_plus: parseFloat(year.rows[0].total_d_plus || 0).toFixed(0),
-        hours: parseFloat(year.rows[0].total_hours || 0).toFixed(1),
-        avg_hr: Math.round(parseFloat(year.rows[0].avg_hr || 0))
-      },
-      all_time: {
-        activities: parseInt(allTime.rows[0].count),
-        km: parseFloat(allTime.rows[0].total_km || 0).toFixed(1),
-        d_plus: parseFloat(allTime.rows[0].total_d_plus || 0).toFixed(0),
-        hours: parseFloat(allTime.rows[0].total_hours || 0).toFixed(1)
-      },
-      recent_activities: recentActivities.rows.map(a => ({
-        name: a.name,
-        date: a.start_date,
-        km: parseFloat(a.distance_km).toFixed(1),
-        duration_min: Math.round(a.duration_min),
-        d_plus: a.total_elevation_gain,
-        avg_hr: a.average_heartrate,
-        type: a.type
-      }))
+      weekly_progression: weeklyLoads
     };
 
-    // Prompt pour l'analyse globale
-    const prompt = `Tu es un coach de course à pied EXIGEANT. Analyse le PROFIL GLOBAL de ce coureur.
+    // Prompt ULTRA-INTELLIGENT pour analyse profonde
+    const prompt = `Tu es le MEILLEUR coach sportif au monde. Analyse ULTRA-PROFONDE du profil de cet athlète.
 
-DONNÉES DU COUREUR :
+DONNÉES COMPLÈTES (CAP ET VÉLO SÉPARÉS) :
 ${JSON.stringify(profileData, null, 2)}
 
-ANALYSE OBLIGATOIRE :
-1. **Volume d'entraînement** :
-   - 7 jours vs 30 jours → Progression cohérente ou pic anormal ?
-   - Comparaison avec l'année → En surcharge ou sous-entraînement ?
+TON RÔLE DE COACH EXPERT :
+Tu dois détecter TOUS les patterns, anomalies, risques et opportunités. Sois ULTRA-EXIGEANT et FACTUEL.
 
-2. **Régularité** :
-   - Fréquence des séances adaptée ?
-   - Activités récentes régulières ou erratiques ?
+ANALYSE OBLIGATOIRE ULTRA-DÉTAILLÉE :
 
-3. **Intensité** :
-   - FC moyenne cohérente ?
-   - Trop d'intensité ou pas assez ?
+1. **TENDANCES & PATTERNS** (analyse semaine par semaine) :
+   - Détecter les PICS de charge : grosse semaine suivie d'une baisse ? C'est normal (récup) ou inquiétant (épuisement) ?
+   - Irrégularités : volume erratique = mauvaise planification
+   - Progression : +10% max/semaine respecté ? Ou augmentation dangereuse ?
+   - Détecter sous-régime : trop peu de volume pour progresser
 
-4. **Progressivité** :
-   - Augmentation du volume prudente (10% max/semaine) ou dangereuse ?
-   - Risque de blessure imminent ?
+2. **CHARGE D'ENTRAÎNEMENT** (CAP + Vélo) :
+   - Volume CAP vs Vélo : équilibre correct ou déséquilibré ?
+   - Cumul total : surcharge globale même si un sport semble ok ?
+   - Dénivelé CAP : trop, pas assez, cohérent avec le volume ?
 
-5. **Plan d'action** :
-   - Objectif de volume pour la semaine prochaine (KM PRÉCIS)
-   - Type de séances à privilégier
-   - AVERTISSEMENTS si nécessaire
+3. **RÉGULARITÉ & FRÉQUENCE** :
+   - Nombre de séances/semaine : suffisant ? Trop espacé ?
+   - Longues pauses détectées ? Pourquoi ? Blessure probable ?
+   - Constance : athlète régulier ou "yoyo" ?
 
-SOIS DIRECT ET FACTUEL. Si le coureur fait n'importe quoi, DIS-LE.
+4. **INTENSITÉ & RÉCUPÉRATION** :
+   - FC moyenne : trop haute (surentraînement) ou basse (sous-régime) ?
+   - Après un pic, récup suffisante ? Ou rechargé trop vite ?
+   - Détecter fatigue chronique si FC élevée + volume important
+
+5. **RISQUES IDENTIFIÉS** (sois ALARMISTE si nécessaire) :
+   - Blessure imminente ? (progression trop rapide, volume excessif)
+   - Surentraînement ? (volume élevé, irrégularité, FC haute)
+   - Sous-entraînement ? (trop peu de km, pas de progression)
+   - Déséquilibre musculaire ? (que du plat, pas de D+)
+
+6. **PLAN D'ACTION PRÉCIS** :
+   - Semaine prochaine : X km CAP + Y km Vélo (CHIFFRES EXACTS)
+   - Type de séances : endurance, fractionné, récup
+   - AVERTISSEMENTS : ce qu'il NE FAUT PAS faire
+   - Objectif 4 semaines : volume cible progressif
+
+RÈGLES ABSOLUES :
+- Ne mélange JAMAIS CAP et Vélo dans les chiffres
+- Explique les CAUSES des patterns (ex: "Grosse semaine S-3 à 50km puis chute à 20km S-2 = récup normale OU épuisement ?")
+- Si c'est dangereux, DIS-LE clairement
+- Si c'est médiocre, DIS-LE
+- Pas de compliments gratuits, seulement si vraiment mérité
+- Donne des CHIFFRES PRÉCIS, pas du vague
 
 ANALYSE :`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 2000,
+      max_tokens: 3000,
       temperature: 0.7,
       messages: [
         {
