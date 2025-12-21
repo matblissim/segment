@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS activity_likes (
     UNIQUE(activity_id, user_id)
 );
 
-CREATE INDEX idx_activity_likes_activity ON activity_likes(activity_id);
-CREATE INDEX idx_activity_likes_user ON activity_likes(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_likes_activity ON activity_likes(activity_id);
+CREATE INDEX IF NOT EXISTS idx_activity_likes_user ON activity_likes(user_id);
 
 -- Table pour les commentaires d'activités
 CREATE TABLE IF NOT EXISTS activity_comments (
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS activity_comments (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_activity_comments_activity ON activity_comments(activity_id);
-CREATE INDEX idx_activity_comments_user ON activity_comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_comments_activity ON activity_comments(activity_id);
+CREATE INDEX IF NOT EXISTS idx_activity_comments_user ON activity_comments(user_id);
 
 -- Table pour les notifications
 CREATE TABLE IF NOT EXISTS notifications (
@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS notifications (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_notifications_user ON notifications(user_id, read);
-CREATE INDEX idx_notifications_created ON notifications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at DESC);
 
 -- Vue pour le feed d'activités des amis
 DROP VIEW IF EXISTS feed_activities CASCADE;
@@ -66,8 +66,7 @@ SELECT
     a.kudos_count,
     (SELECT COUNT(*) FROM activity_likes WHERE activity_id = a.strava_id) as likes_count,
     (SELECT COUNT(*) FROM activity_comments WHERE activity_id = a.strava_id) as comments_count,
-    a.created_at,
-    a.updated_at
+    a.created_at
 FROM activities a
 JOIN users u ON a.user_id = u.id
 ORDER BY a.start_date DESC;
@@ -97,8 +96,7 @@ RETURNS TABLE (
     likes_count BIGINT,
     comments_count BIGINT,
     user_has_liked BOOLEAN,
-    created_at TIMESTAMP,
-    updated_at TIMESTAMP
+    created_at TIMESTAMP
 ) AS $$
 BEGIN
     RETURN QUERY
