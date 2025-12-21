@@ -197,7 +197,7 @@ ANALYSE :`;
 
     // 7. Appeler Claude
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20240620',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 1500,
       temperature: 0.7,
       messages: [
@@ -360,7 +360,7 @@ SOIS DIRECT ET FACTUEL. Si le coureur fait n'importe quoi, DIS-LE.
 ANALYSE :`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20240620',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 2000,
       temperature: 0.7,
       messages: [
