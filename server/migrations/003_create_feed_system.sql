@@ -46,7 +46,7 @@ CREATE INDEX idx_notifications_created ON notifications(created_at DESC);
 CREATE OR REPLACE VIEW feed_activities AS
 SELECT
     a.id,
-    a.strava_activity_id,
+    a.strava_id as strava_activity_id,
     a.user_id,
     u.username,
     u.strava_id,
@@ -64,8 +64,8 @@ SELECT
     a.max_heartrate,
     a.kudos_count,
     a.comment_count,
-    (SELECT COUNT(*) FROM activity_likes WHERE activity_id = a.strava_activity_id) as likes_count,
-    (SELECT COUNT(*) FROM activity_comments WHERE activity_id = a.strava_activity_id) as comments_count,
+    (SELECT COUNT(*) FROM activity_likes WHERE activity_id = a.strava_id) as likes_count,
+    (SELECT COUNT(*) FROM activity_comments WHERE activity_id = a.strava_id) as comments_count,
     a.created_at,
     a.updated_at
 FROM activities a
