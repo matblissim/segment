@@ -210,4 +210,69 @@ router.get('/status/:userId', async (req, res) => {
   }
 });
 
+// Obtenir le classement des amis par période et métrique
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const { period = 'month', metric = 'distance' } = req.query;
+
+    // Définir la date de début selon la période
+    let startDate = new Date();
+    switch (period) {
+      case 'week':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case 'month':
+        startDate.setDate(1);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'year':
+        startDate.setMonth(0, 1);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      default:
+        startDate.setDate(1);
+        startDate.setHours(0, 0, 0, 0);
+    }
+
+    // Récupérer les amis
+    const friends = await Friendship.getFriends(req.userId);
+
+    // Pour chaque ami, calculer la métrique demandée
+    const leaderboard = await Promise.all(
+      friends.map(async (friend) => {
+        const statsResult = await pool.query(
+          `SELECT
+             COALESCE(SUM(distance), 0) as total_distance,
+             COALESCE(SUM(total_elevation_gain), 0) as total_elevation
+           FROM activities
+           WHERE user_id = $1 AND start_date >= $2`,
+          [friend.friend_id, startDate]
+        );
+
+        const stats = statsResult.rows[0];
+        const value = metric === 'distance'
+          ? parseFloat(stats.total_distance) || 0
+          : parseFloat(stats.total_elevation) || 0;
+
+        return {
+          friend_id: friend.friend_id,
+          friend_username: friend.friend_username,
+          friend_strava_id: friend.friend_strava_id,
+          value: value,
+          distance: parseFloat(stats.total_distance) || 0,
+          elevation: parseFloat(stats.total_elevation) || 0
+        };
+      })
+    );
+
+    // Trier par valeur décroissante
+    leaderboard.sort((a, b) => b.value - a.value);
+
+    res.json({ leaderboard, period, metric });
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
 export default router;

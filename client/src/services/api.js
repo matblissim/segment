@@ -293,6 +293,15 @@ export const friendsApi = {
     });
     return response.data;
   },
+
+  // Obtenir le classement des amis
+  getLeaderboard: async (period = 'month', metric = 'distance') => {
+    const response = await axios.get(`${API_BASE_URL}/friends/leaderboard`, {
+      headers: getAuthHeaders(),
+      params: { period, metric },
+    });
+    return response.data;
+  },
 };
 
 // Feed API (nécessite authentification)
