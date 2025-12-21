@@ -47,7 +47,7 @@ router.get('/', async (req, res) => {
              COALESCE(SUM(total_elevation_gain), 0) as monthly_elevation
            FROM activities
            WHERE user_id = $1 AND start_date >= $2`,
-          [friend.id, startOfMonth]
+          [friend.friend_id, startOfMonth]
         );
 
         const stats = statsResult.rows[0];
@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
              AND e.event_date >= CURRENT_DATE
            ORDER BY e.event_date ASC
            LIMIT 1`,
-          [friend.id]
+          [friend.friend_id]
         );
 
         const nextEvent = eventResult.rows[0] || null;
