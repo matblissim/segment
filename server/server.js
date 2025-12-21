@@ -14,6 +14,7 @@ import adminRoutes from './routes/admin.js';
 import friendsRoutes from './routes/friends.js';
 import feedRoutes from './routes/feed.js';
 import eventsRoutes from './routes/events.js';
+import challengesRoutes from './routes/challenges.js';
 
 // Import de la configuration DB et du worker
 import { pool, redis } from './config/database.js';
@@ -52,6 +53,9 @@ app.use('/api/feed', feedRoutes);
 
 // Routes events (nécessite authentification)
 app.use('/api/events', eventsRoutes);
+
+// Routes challenges (nécessite authentification)
+app.use('/api/challenges', challengesRoutes);
 
 // Routes Strava legacy (pour compatibilité)
 app.use('/api/strava', stravaRoutes);

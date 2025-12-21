@@ -494,3 +494,79 @@ export const eventsApi = {
     return response.data;
   },
 };
+
+// Challenges API (nécessite authentification)
+export const challengesApi = {
+  getChallenges: async () => {
+    const response = await axios.get(`${API_BASE_URL}/challenges`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getActiveChallenges: async () => {
+    const response = await axios.get(`${API_BASE_URL}/challenges/active`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getPendingChallenges: async () => {
+    const response = await axios.get(`${API_BASE_URL}/challenges/pending`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  createChallenge: async (challengeData) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/challenges`,
+      challengeData,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  acceptChallenge: async (challengeId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/challenges/${challengeId}/accept`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  declineChallenge: async (challengeId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/challenges/${challengeId}/decline`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  cancelChallenge: async (challengeId) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/challenges/${challengeId}/cancel`,
+      {},
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  getProgress: async (challengeId) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/challenges/${challengeId}/progress`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  getH2HStats: async (friendId) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/challenges/h2h/${friendId}`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+};
