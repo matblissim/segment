@@ -1,16 +1,24 @@
-import { Dialog, DialogHeader, DialogBody, DialogFooter, Button, Typography, Spinner } from '@material-tailwind/react';
+import { Dialog, DialogHeader, DialogBody, DialogFooter, Button, Typography, Spinner, Progress } from '@material-tailwind/react';
 import { SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { aiApi } from '../services/api';
 
 export default function AIAnalysisDialog({ open, onClose, activityId, activityName, isProfileAnalysis = false }) {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const progressIntervalRef = useRef(null);
 
   useEffect(() => {
     if (open) {
       loadAnalysis();
+    } else {
+      // Cleanup: reset progress when dialog closes
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      setProgress(0);
     }
   }, [open, activityId, isProfileAnalysis]);
 
@@ -18,6 +26,16 @@ export default function AIAnalysisDialog({ open, onClose, activityId, activityNa
     setLoading(true);
     setError(null);
     setAnalysis(null);
+    setProgress(0);
+
+    // Simulate progress: gradually increase from 0 to 90% during loading
+    // The last 10% will complete when the API responds
+    progressIntervalRef.current = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 90) return 90; // Stop at 90% until API responds
+        return prev + 10;
+      });
+    }, 500); // Update every 500ms
 
     try {
       let result;
@@ -27,11 +45,17 @@ export default function AIAnalysisDialog({ open, onClose, activityId, activityNa
         result = await aiApi.analyzeActivity(activityId);
       }
       setAnalysis(result.analysis);
+      setProgress(100); // Complete the progress
     } catch (err) {
       console.error('Error loading AI analysis:', err);
       setError(err.response?.data?.error || 'Erreur lors de l\'analyse IA');
     } finally {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
       setLoading(false);
+      // Reset progress after a delay
+      setTimeout(() => setProgress(0), 1000);
     }
   };
 
@@ -135,15 +159,33 @@ export default function AIAnalysisDialog({ open, onClose, activityId, activityNa
 
       <DialogBody className="max-h-[70vh] overflow-y-auto p-6">
         {loading && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <Spinner className="h-12 w-12 mb-4" color="purple" />
-            <Typography color="gray">
+          <div className="flex flex-col items-center justify-center py-12 px-8">
+            <div className="mb-6">
+              <Spinner className="h-12 w-12" color="purple" />
+            </div>
+            <Typography color="gray" className="mb-4 text-center font-semibold">
               {isProfileAnalysis
-                ? 'Analyse de votre profil en cours...'
-                : 'Analyse de votre activité en cours...'}
+                ? 'Analyse IA de votre profil en cours...'
+                : 'Analyse IA de votre activité en cours...'}
             </Typography>
-            <Typography variant="small" color="gray" className="mt-2">
-              Cela peut prendre quelques secondes
+
+            {/* Progress Bar */}
+            <div className="w-full max-w-md">
+              <Progress
+                value={progress}
+                color="purple"
+                className="mb-2"
+              />
+              <Typography variant="small" color="gray" className="text-center">
+                {progress}% - {progress < 30 ? 'Récupération des données...' :
+                             progress < 60 ? 'Analyse en cours...' :
+                             progress < 90 ? 'Génération du feedback...' :
+                             'Finalisation...'}
+              </Typography>
+            </div>
+
+            <Typography variant="small" color="gray" className="mt-4 text-center opacity-75">
+              L'IA analyse vos métriques en profondeur
             </Typography>
           </div>
         )}
