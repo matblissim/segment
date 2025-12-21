@@ -236,11 +236,10 @@ router.get('/leaderboard', async (req, res) => {
 
     // Construire le filtre sport_type
     let sportFilter = '';
-    let sportParams = [];
     if (sport_type === 'running') {
-      sportFilter = ` AND sport_type = 'running'`;
+      sportFilter = ` AND sport_type IN ('Run', 'TrailRun', 'VirtualRun', 'Trail')`;
     } else if (sport_type === 'cycling') {
-      sportFilter = ` AND sport_type = 'cycling'`;
+      sportFilter = ` AND sport_type IN ('Ride', 'VirtualRide', 'EBikeRide')`;
     }
 
     // Récupérer les amis
