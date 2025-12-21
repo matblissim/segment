@@ -13,6 +13,7 @@ import { TrophyIcon } from '@heroicons/react/24/outline';
 import { friendsApi } from '../services/api';
 
 export default function FriendsLeaderboard() {
+  const [sportType, setSportType] = useState('all');
   const [period, setPeriod] = useState('month');
   const [metric, setMetric] = useState('distance');
   const [leaderboard, setLeaderboard] = useState([]);
@@ -21,13 +22,13 @@ export default function FriendsLeaderboard() {
 
   useEffect(() => {
     loadLeaderboard();
-  }, [period, metric]);
+  }, [period, metric, sportType]);
 
   const loadLeaderboard = async () => {
     try {
       setLoading(true);
       setError('');
-      const data = await friendsApi.getLeaderboard(period, metric);
+      const data = await friendsApi.getLeaderboard(period, metric, sportType);
       setLeaderboard(data.leaderboard || []);
     } catch (err) {
       console.error('Error loading leaderboard:', err);
@@ -96,12 +97,44 @@ export default function FriendsLeaderboard() {
         <div className="flex flex-col gap-3">
           <div>
             <Typography variant="small" color="gray" className="mb-2 font-medium">
+              Sport
+            </Typography>
+            <ButtonGroup size="sm" fullWidth>
+              <Button
+                variant={sportType === 'all' ? 'filled' : 'outlined'}
+                color={sportType === 'all' ? 'green' : 'gray'}
+                onClick={() => setSportType('all')}
+                className="normal-case"
+              >
+                Tous
+              </Button>
+              <Button
+                variant={sportType === 'running' ? 'filled' : 'outlined'}
+                color={sportType === 'running' ? 'green' : 'gray'}
+                onClick={() => setSportType('running')}
+                className="normal-case"
+              >
+                Course
+              </Button>
+              <Button
+                variant={sportType === 'cycling' ? 'filled' : 'outlined'}
+                color={sportType === 'cycling' ? 'green' : 'gray'}
+                onClick={() => setSportType('cycling')}
+                className="normal-case"
+              >
+                Vélo
+              </Button>
+            </ButtonGroup>
+          </div>
+
+          <div>
+            <Typography variant="small" color="gray" className="mb-2 font-medium">
               Période
             </Typography>
             <ButtonGroup size="sm" fullWidth>
               <Button
                 variant={period === 'week' ? 'filled' : 'outlined'}
-                color="blue-gray"
+                color={period === 'week' ? 'green' : 'gray'}
                 onClick={() => setPeriod('week')}
                 className="normal-case"
               >
@@ -109,7 +142,7 @@ export default function FriendsLeaderboard() {
               </Button>
               <Button
                 variant={period === 'month' ? 'filled' : 'outlined'}
-                color="blue-gray"
+                color={period === 'month' ? 'green' : 'gray'}
                 onClick={() => setPeriod('month')}
                 className="normal-case"
               >
@@ -117,7 +150,7 @@ export default function FriendsLeaderboard() {
               </Button>
               <Button
                 variant={period === 'year' ? 'filled' : 'outlined'}
-                color="blue-gray"
+                color={period === 'year' ? 'green' : 'gray'}
                 onClick={() => setPeriod('year')}
                 className="normal-case"
               >
@@ -133,7 +166,7 @@ export default function FriendsLeaderboard() {
             <ButtonGroup size="sm" fullWidth>
               <Button
                 variant={metric === 'distance' ? 'filled' : 'outlined'}
-                color="blue-gray"
+                color={metric === 'distance' ? 'green' : 'gray'}
                 onClick={() => setMetric('distance')}
                 className="normal-case"
               >
@@ -141,7 +174,7 @@ export default function FriendsLeaderboard() {
               </Button>
               <Button
                 variant={metric === 'elevation' ? 'filled' : 'outlined'}
-                color="blue-gray"
+                color={metric === 'elevation' ? 'green' : 'gray'}
                 onClick={() => setMetric('elevation')}
                 className="normal-case"
               >

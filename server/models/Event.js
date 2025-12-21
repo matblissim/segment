@@ -4,12 +4,12 @@ class Event {
   /**
    * Créer un nouvel événement
    */
-  static async create(userId, name, eventDate, description = null, location = null) {
+  static async create(userId, name, eventDate, description = null, location = null, targetDistance = null, targetElevation = null) {
     const result = await pool.query(
-      `INSERT INTO events (created_by, name, event_date, description, location)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO events (created_by, name, event_date, description, location, target_distance, target_elevation)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [userId, name, eventDate, description, location]
+      [userId, name, eventDate, description, location, targetDistance, targetElevation]
     );
     return result.rows[0];
   }

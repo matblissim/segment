@@ -295,10 +295,10 @@ export const friendsApi = {
   },
 
   // Obtenir le classement des amis
-  getLeaderboard: async (period = 'month', metric = 'distance') => {
+  getLeaderboard: async (period = 'month', metric = 'distance', sportType = 'all') => {
     const response = await axios.get(`${API_BASE_URL}/friends/leaderboard`, {
       headers: getAuthHeaders(),
-      params: { period, metric },
+      params: { period, metric, sport_type: sportType },
     });
     return response.data;
   },

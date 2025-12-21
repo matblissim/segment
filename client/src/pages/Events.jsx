@@ -27,7 +27,9 @@ export default function Events() {
     name: '',
     event_date: '',
     description: '',
-    location: ''
+    location: '',
+    target_distance: '',
+    target_elevation: ''
   });
 
   useEffect(() => {
@@ -47,9 +49,15 @@ export default function Events() {
 
   const handleCreateEvent = async () => {
     try {
-      await eventsApi.createEvent(newEvent);
+      // Convertir les valeurs en nombre pour distance et elevation
+      const eventData = {
+        ...newEvent,
+        target_distance: newEvent.target_distance ? parseFloat(newEvent.target_distance) * 1000 : null,
+        target_elevation: newEvent.target_elevation ? parseFloat(newEvent.target_elevation) : null
+      };
+      await eventsApi.createEvent(eventData);
       setCreateDialogOpen(false);
-      setNewEvent({ name: '', event_date: '', description: '', location: '' });
+      setNewEvent({ name: '', event_date: '', description: '', location: '', target_distance: '', target_elevation: '' });
       loadEvents();
     } catch (error) {
       console.error('Error creating event:', error);
@@ -180,6 +188,16 @@ export default function Events() {
                           <span>{event.location}</span>
                         </div>
                       )}
+                      {(event.target_distance || event.target_elevation) && (
+                        <div className="flex items-center gap-3 text-sm text-blue-600 mt-1 font-medium">
+                          {event.target_distance && (
+                            <span>🎯 {(event.target_distance / 1000).toFixed(0)} km</span>
+                          )}
+                          {event.target_elevation && (
+                            <span>⛰️ {Math.round(event.target_elevation)} m D+</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <Chip
                       value={getCountdownText(daysUntil)}
@@ -287,6 +305,20 @@ export default function Events() {
             value={newEvent.location}
             onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
           />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              type="number"
+              label="Distance cible (km)"
+              value={newEvent.target_distance}
+              onChange={(e) => setNewEvent({ ...newEvent, target_distance: e.target.value })}
+            />
+            <Input
+              type="number"
+              label="D+ cible (m)"
+              value={newEvent.target_elevation}
+              onChange={(e) => setNewEvent({ ...newEvent, target_elevation: e.target.value })}
+            />
+          </div>
           <Textarea
             label="Description"
             value={newEvent.description}

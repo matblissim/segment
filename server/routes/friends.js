@@ -213,7 +213,7 @@ router.get('/status/:userId', async (req, res) => {
 // Obtenir le classement des amis par période et métrique
 router.get('/leaderboard', async (req, res) => {
   try {
-    const { period = 'month', metric = 'distance' } = req.query;
+    const { period = 'month', metric = 'distance', sport_type = 'all' } = req.query;
 
     // Définir la date de début selon la période
     let startDate = new Date();
@@ -234,6 +234,15 @@ router.get('/leaderboard', async (req, res) => {
         startDate.setHours(0, 0, 0, 0);
     }
 
+    // Construire le filtre sport_type
+    let sportFilter = '';
+    let sportParams = [];
+    if (sport_type === 'running') {
+      sportFilter = ` AND sport_type = 'running'`;
+    } else if (sport_type === 'cycling') {
+      sportFilter = ` AND sport_type = 'cycling'`;
+    }
+
     // Récupérer les amis
     const friends = await Friendship.getFriends(req.userId);
 
@@ -250,7 +259,7 @@ router.get('/leaderboard', async (req, res) => {
          COALESCE(SUM(distance), 0) as total_distance,
          COALESCE(SUM(total_elevation_gain), 0) as total_elevation
        FROM activities
-       WHERE user_id = $1 AND start_date >= $2`,
+       WHERE user_id = $1 AND start_date >= $2${sportFilter}`,
       [req.userId, startDate]
     );
 
@@ -267,7 +276,7 @@ router.get('/leaderboard', async (req, res) => {
              COALESCE(SUM(distance), 0) as total_distance,
              COALESCE(SUM(total_elevation_gain), 0) as total_elevation
            FROM activities
-           WHERE user_id = $1 AND start_date >= $2`,
+           WHERE user_id = $1 AND start_date >= $2${sportFilter}`,
           [friend.friend_id, startDate]
         );
 

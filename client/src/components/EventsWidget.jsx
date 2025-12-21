@@ -136,6 +136,13 @@ export default function EventsWidget() {
                         📍 {event.location}
                       </Typography>
                     )}
+                    {(event.target_distance || event.target_elevation) && (
+                      <Typography variant="small" color="blue" className="text-xs font-medium">
+                        {event.target_distance && `🎯 ${(event.target_distance / 1000).toFixed(0)} km`}
+                        {event.target_distance && event.target_elevation && ' • '}
+                        {event.target_elevation && `⛰️ ${Math.round(event.target_elevation)} m D+`}
+                      </Typography>
+                    )}
                     {event.participants_count > 0 && (
                       <Typography variant="small" color="blue-gray" className="text-xs mt-1">
                         👥 {event.participants_count} participant{event.participants_count > 1 ? 's' : ''}

@@ -37,13 +37,21 @@ router.get('/priority/:priority', async (req, res) => {
 // Créer un nouvel événement
 router.post('/', async (req, res) => {
   try {
-    const { name, event_date, description, location } = req.body;
+    const { name, event_date, description, location, target_distance, target_elevation } = req.body;
 
     if (!name || !event_date) {
       return res.status(400).json({ error: 'Name and event_date are required' });
     }
 
-    const event = await Event.create(req.userId, name, event_date, description, location);
+    const event = await Event.create(
+      req.userId,
+      name,
+      event_date,
+      description,
+      location,
+      target_distance || null,
+      target_elevation || null
+    );
     res.json({ event });
   } catch (error) {
     console.error('Error creating event:', error);
