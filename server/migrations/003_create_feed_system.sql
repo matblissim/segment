@@ -43,7 +43,8 @@ CREATE INDEX idx_notifications_user ON notifications(user_id, read);
 CREATE INDEX idx_notifications_created ON notifications(created_at DESC);
 
 -- Vue pour le feed d'activités des amis
-CREATE OR REPLACE VIEW feed_activities AS
+DROP VIEW IF EXISTS feed_activities CASCADE;
+CREATE VIEW feed_activities AS
 SELECT
     a.id,
     a.strava_id as strava_activity_id,
@@ -63,7 +64,6 @@ SELECT
     a.average_heartrate,
     a.max_heartrate,
     a.kudos_count,
-    a.comment_count,
     (SELECT COUNT(*) FROM activity_likes WHERE activity_id = a.strava_id) as likes_count,
     (SELECT COUNT(*) FROM activity_comments WHERE activity_id = a.strava_id) as comments_count,
     a.created_at,
@@ -73,7 +73,8 @@ JOIN users u ON a.user_id = u.id
 ORDER BY a.start_date DESC;
 
 -- Vue pour obtenir les activités du feed d'un utilisateur (ses amis + lui-même)
-CREATE OR REPLACE FUNCTION get_user_feed(p_user_id INTEGER, p_limit INTEGER DEFAULT 50, p_offset INTEGER DEFAULT 0)
+DROP FUNCTION IF EXISTS get_user_feed(INTEGER, INTEGER, INTEGER);
+CREATE FUNCTION get_user_feed(p_user_id INTEGER, p_limit INTEGER DEFAULT 50, p_offset INTEGER DEFAULT 0)
 RETURNS TABLE (
     id INTEGER,
     strava_activity_id BIGINT,
@@ -93,7 +94,6 @@ RETURNS TABLE (
     average_heartrate DECIMAL,
     max_heartrate DECIMAL,
     kudos_count INTEGER,
-    comment_count INTEGER,
     likes_count BIGINT,
     comments_count BIGINT,
     user_has_liked BOOLEAN,
