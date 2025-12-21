@@ -173,6 +173,15 @@ router.post('/analyze-activity/:activityId', async (req, res) => {
 DONNÉES DE LA SÉANCE :
 ${JSON.stringify(activityData, null, 2)}
 
+CONTEXTE IMPORTANT - DÉTECTION AUTOMATIQUE :
+Avant d'analyser, DÉTERMINE si c'est :
+- **COURSE/COMPÉTITION** : nom contient "course", "10km", "semi", "marathon", "trail", "race", OU distance exacte 5km/10km/21.1km/42.2km, OU allure très soutenue constante
+- **ENTRAÎNEMENT** : sortie classique, fractionné, sortie longue
+
+⚠️ ADAPTE ton analyse selon le type :
+- COURSE : départ rapide NORMAL, FC haute ACCEPTABLE, splits décroissants OK si faible (fatigue normale), l'objectif = performance
+- ENTRAÎNEMENT : régularité PRIMORDIALE, gestion FC importante, l'objectif = adaptation/progression
+
 TON RÔLE DE COACH EXPERT :
 - Analyse ULTRA-PROFONDE de chaque métrique
 - Détecte TOUTES les erreurs tactiques et physiologiques
@@ -182,41 +191,49 @@ TON RÔLE DE COACH EXPERT :
 
 ANALYSE OBLIGATOIRE DÉTAILLÉE :
 
-1. **GESTION DE L'ALLURE** (analyse split par split) :
-   - Régularité : écart-type des splits acceptable ou catastrophique ?
-   - Départ : trop rapide (splits décroissants) ou bien géré ?
-   - Gestion du dénivelé : adaptation en montée/descente cohérente ?
-   - Verdict : allure maîtrisée OU course n'importe comment ?
+0. **TYPE DE SÉANCE** (OBLIGATOIRE EN PREMIER) :
+   - Détermine : COURSE ou ENTRAÎNEMENT ? Pourquoi ?
+   - Adapte les critères d'évaluation en conséquence
 
-2. **ANALYSE CARDIAQUE** (zones, dérive, cohérence) :
-   - Distribution zones FC : adaptée à l'objectif (endurance Z2 ? tempo Z3-Z4 ?) ?
-   - Dérive cardiaque détectée : fatigue musculaire, déshydratation, effort trop long ?
+1. **GESTION DE L'ALLURE** (analyse split par split, SELON LE TYPE) :
+   - SI COURSE : départ rapide OK, cherche NEGATIVE SPLIT (accélération fin) ou EVEN SPLIT (régularité). Splits décroissants légers = fatigue acceptable si course longue
+   - SI ENTRAÎNEMENT : régularité EXIGÉE, écart-type faible attendu, départ trop rapide = ERREUR
+   - Gestion du dénivelé : adaptation en montée/descente cohérente ?
+   - Verdict tactique : stratégie intelligente OU erreurs de gestion ?
+
+2. **ANALYSE CARDIAQUE** (zones, dérive, cohérence - SELON TYPE) :
+   - SI COURSE : FC haute Z4-Z5 NORMALE pour performance, dérive acceptable si effort > 1h
+   - SI ENTRAÎNEMENT : distribution zones selon objectif (endurance Z2, tempo Z3, fractionné Z4-Z5)
+   - Dérive cardiaque : fatigue musculaire, déshydratation, effort trop long pour le niveau ?
    - FC cohérente avec allure : économie de course bonne ou mauvaise ?
-   - Zones HR suspectes : trop de temps en zone rouge = surentraînement ?
+   - Zones HR suspectes : trop de temps en zone rouge en ENTRAÎNEMENT = surentraînement
 
 3. **CONTEXTE & CHARGE** (par rapport à l'historique 30j) :
    - Volume de cette séance vs moyenne habituelle : cohérent ?
-   - Après une grosse semaine ou période de repos ? Timing intelligent ?
-   - Intensité : trop poussée pour le niveau actuel ?
+   - SI COURSE : timing intelligent ? Affûté (volume réduit avant) ou fatigué (grosse semaine juste avant) ?
+   - SI ENTRAÎNEMENT : après une grosse semaine ou période de repos ? Timing intelligent ?
+   - Intensité : trop poussée pour le niveau actuel ? Ou bien dosée ?
    - Cette séance = progression logique OU erreur tactique ?
 
-4. **POINTS FAIBLES & ERREURS** (sois IMPITOYABLE) :
-   - Erreurs techniques détectées (allure, FC, gestion)
-   - Manques identifiés (pas assez de D+, trop de plat, pas varié)
+4. **PERFORMANCE & POINTS FAIBLES** (sois IMPITOYABLE mais JUSTE) :
+   - SI COURSE : performance cohérente avec niveau ? Marge de progression identifiée ? Stratégie optimale ou erreurs de gestion ?
+   - SI ENTRAÎNEMENT : objectif de séance respecté ? Erreurs techniques détectées (allure, FC, gestion)
+   - Manques identifiés (pas assez de D+, trop de plat, manque de variété)
    - Risques à court terme : blessure, fatigue, surentraînement
    - Ce qui DOIT changer pour la prochaine fois
 
-5. **CONSIGNES POUR LA SUITE** (PRÉCISES) :
-   - Prochaine séance : type, durée, allure cible, zones FC
-   - Récupération nécessaire : jours de repos, séance légère
-   - Interdictions : ce qu'il NE FAUT PAS faire
-   - Objectif : où aller dans les 2 prochaines semaines
+5. **CONSIGNES POUR LA SUITE** (PRÉCISES selon contexte) :
+   - SI COURSE RÉCENTE : temps de récup nécessaire (2-7j selon distance), retour progressif, bilan de la perf
+   - SI ENTRAÎNEMENT : prochaine séance (type, durée, allure cible, zones FC), récup nécessaire, interdictions
+   - Objectif 2 semaines : où aller, volume cible, adaptations nécessaires
 
 RÈGLES ABSOLUES :
+- DÉTECTE le type de séance (COURSE ou ENTRAÎNEMENT) et ADAPTE l'analyse
 - Sois FACTUEL et CHIFFRÉ (pas de "pas mal", donne des chiffres)
 - Si c'est mauvais, DIS-LE sans détour
-- Si c'est bon, ok, mais explique POURQUOI
-- Pas de "bravo" ou "félicitations" vides
+- Si c'est bon, ok, mais explique POURQUOI avec données
+- SI COURSE : reconnais la performance si méritée, mais identifie les marges de progression
+- SI ENTRAÎNEMENT : exige la rigueur, identifie les erreurs de gestion
 - Analyse INTELLIGENTE : cherche les CAUSES derrière les chiffres
 
 ANALYSE :`;
