@@ -9,8 +9,7 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
   const [challengeData, setChallengeData] = useState({
     metric: 'distance',
     target_value: '',
-    start_date: '',
-    end_date: ''
+    start_date: ''
   });
   // Type peut être: 'friend', 'pending', 'sent', 'search'
 
@@ -38,8 +37,8 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
         target_value: challengeData.metric === 'distance'
           ? parseFloat(challengeData.target_value) * 1000 // Convert km to meters
           : parseFloat(challengeData.target_value), // D+ already in meters
-        start_date: challengeData.start_date,
-        end_date: challengeData.end_date
+        start_date: challengeData.start_date
+        // end_date est auto-généré par le backend (start_date + 30 jours)
       };
 
       await challengesApi.createChallenge(data);
@@ -47,8 +46,7 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
       setChallengeData({
         metric: 'distance',
         target_value: '',
-        start_date: '',
-        end_date: ''
+        start_date: ''
       });
 
       if (onAction) {
@@ -222,6 +220,10 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
       <Dialog open={showChallengeDialog} handler={setShowChallengeDialog}>
         <DialogHeader>Défier {friend.username || friend.friend_username}</DialogHeader>
         <DialogBody className="space-y-4">
+          <Typography variant="small" color="gray" className="mb-2">
+            Premier arrivé, premier gagnant ! Défiez votre ami d'atteindre un objectif avant vous.
+          </Typography>
+
           <div>
             <Typography variant="small" color="blue-gray" className="mb-2 font-semibold">
               Type de challenge
@@ -243,20 +245,16 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
             onChange={(e) => setChallengeData({ ...challengeData, target_value: e.target.value })}
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="date"
-              label="Date de début"
-              value={challengeData.start_date}
-              onChange={(e) => setChallengeData({ ...challengeData, start_date: e.target.value })}
-            />
-            <Input
-              type="date"
-              label="Date de fin"
-              value={challengeData.end_date}
-              onChange={(e) => setChallengeData({ ...challengeData, end_date: e.target.value })}
-            />
-          </div>
+          <Input
+            type="date"
+            label="Date de début"
+            value={challengeData.start_date}
+            onChange={(e) => setChallengeData({ ...challengeData, start_date: e.target.value })}
+          />
+
+          <Typography variant="small" color="gray" className="text-xs">
+            Le challenge sera automatiquement clôturé après 30 jours. Le premier à atteindre l'objectif gagne !
+          </Typography>
         </DialogBody>
         <DialogFooter className="gap-2">
           <Button variant="text" color="red" onClick={() => setShowChallengeDialog(false)}>
@@ -266,7 +264,7 @@ export default function FriendCard({ friend, type = 'friend', onAction }) {
             variant="gradient"
             color="green"
             onClick={handleCreateChallenge}
-            disabled={!challengeData.target_value || !challengeData.start_date || !challengeData.end_date}
+            disabled={!challengeData.target_value || !challengeData.start_date}
           >
             Créer le challenge
           </Button>

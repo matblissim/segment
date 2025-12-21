@@ -3,13 +3,22 @@ import { pool } from '../config/database.js';
 class Challenge {
   /**
    * Créer un nouveau challenge
+   * endDate est optionnel - si non fourni, défaut à startDate + 30 jours
    */
-  static async create(challengerId, challengedId, metric, targetValue, startDate, endDate) {
+  static async create(challengerId, challengedId, metric, targetValue, startDate, endDate = null) {
+    // Si pas de end_date, calculer automatiquement (start_date + 30 jours)
+    let finalEndDate = endDate;
+    if (!finalEndDate) {
+      const start = new Date(startDate);
+      start.setDate(start.getDate() + 30);
+      finalEndDate = start.toISOString().split('T')[0];
+    }
+
     const result = await pool.query(
       `INSERT INTO challenges (challenger_id, challenged_id, metric, target_value, start_date, end_date, status)
        VALUES ($1, $2, $3, $4, $5, $6, 'pending')
        RETURNING *`,
-      [challengerId, challengedId, metric, targetValue, startDate, endDate]
+      [challengerId, challengedId, metric, targetValue, startDate, finalEndDate]
     );
     return result.rows[0];
   }
@@ -122,7 +131,8 @@ class Challenge {
   }
 
   /**
-   * Calculer la progression d'un challenge pour un utilisateur
+   * Calculer la progression d'un challenge
+   * Détecte automatiquement si quelqu'un a atteint l'objectif (premier arrivé gagne)
    */
   static async getProgress(challengeId, userId) {
     // Récupérer le challenge
@@ -161,12 +171,48 @@ class Challenge {
       ? parseFloat(challengedStats.rows[0].total_distance) || 0
       : parseFloat(challengedStats.rows[0].total_elevation) || 0;
 
+    const targetValue = parseFloat(challenge.target_value);
+
+    // Vérifier si quelqu'un a atteint l'objectif (premier arrivé gagne)
+    if (challenge.status === 'active') {
+      const challengerReached = challengerValue >= targetValue;
+      const challengedReached = challengedValue >= targetValue;
+
+      if (challengerReached || challengedReached) {
+        // Déterminer le gagnant (celui qui a atteint en premier)
+        let winnerId = null;
+        if (challengerReached && !challengedReached) {
+          winnerId = challenge.challenger_id;
+        } else if (challengedReached && !challengerReached) {
+          winnerId = challenge.challenged_id;
+        } else if (challengerReached && challengedReached) {
+          // Les deux ont atteint : celui avec la plus grande valeur gagne
+          winnerId = challengerValue > challengedValue
+            ? challenge.challenger_id
+            : challenge.challenged_id;
+        }
+
+        // Marquer le challenge comme terminé
+        await pool.query(
+          `UPDATE challenges
+           SET status = 'completed', winner_id = $2, completed_at = NOW(), updated_at = NOW()
+           WHERE id = $1`,
+          [challengeId, winnerId]
+        );
+
+        // Mettre à jour le challenge dans l'objet retourné
+        challenge.status = 'completed';
+        challenge.winner_id = winnerId;
+        challenge.completed_at = new Date();
+      }
+    }
+
     return {
       challenge,
       challenger_value: challengerValue,
       challenged_value: challengedValue,
-      challenger_percentage: (challengerValue / parseFloat(challenge.target_value)) * 100,
-      challenged_percentage: (challengedValue / parseFloat(challenge.target_value)) * 100,
+      challenger_percentage: (challengerValue / targetValue) * 100,
+      challenged_percentage: (challengedValue / targetValue) * 100,
     };
   }
 
