@@ -26,7 +26,7 @@ class Feed {
 
       // Créer une notification pour le propriétaire de l'activité
       const activity = await pool.query(
-        'SELECT user_id FROM activities WHERE strava_activity_id = $1',
+        'SELECT user_id FROM activities WHERE strava_id = $1',
         [activityId]
       );
 
@@ -94,7 +94,7 @@ class Feed {
 
     // Créer une notification pour le propriétaire de l'activité
     const activity = await pool.query(
-      'SELECT user_id FROM activities WHERE strava_activity_id = $1',
+      'SELECT user_id FROM activities WHERE strava_id = $1',
       [activityId]
     );
 
@@ -234,10 +234,10 @@ class Feed {
   static async getActivityDetails(activityId, userId) {
     // Récupérer l'activité
     const activityResult = await pool.query(
-      `SELECT a.*, u.username, u.strava_id
+      `SELECT a.*, u.username, u.strava_id as user_strava_id
        FROM activities a
        JOIN users u ON a.user_id = u.id
-       WHERE a.strava_activity_id = $1`,
+       WHERE a.strava_id = $1`,
       [activityId]
     );
 
