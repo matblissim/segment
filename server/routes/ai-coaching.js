@@ -82,10 +82,10 @@ router.post('/analyze-activity/:activityId', async (req, res) => {
 
     // 2. Récupérer le token Strava
     const userResult = await pool.query(
-      'SELECT strava_access_token, max_heartrate FROM users WHERE id = $1',
+      'SELECT access_token, max_heartrate FROM users WHERE id = $1',
       [userId]
     );
-    const accessToken = userResult.rows[0].strava_access_token;
+    const accessToken = userResult.rows[0].access_token;
     const userMaxHR = userResult.rows[0].max_heartrate || 190; // Défaut si pas défini
 
     // 3. Récupérer les streams depuis Strava
