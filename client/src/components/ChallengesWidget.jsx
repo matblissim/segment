@@ -16,12 +16,27 @@ export default function ChallengesWidget() {
 
   const loadChallenges = async () => {
     try {
-      const data = await challengesApi.getActiveChallenges();
-      const activeChallenges = data.challenges || [];
-      setChallenges(activeChallenges.slice(0, 3)); // Show only top 3
+      // Charger à la fois les actifs et les en attente
+      const [activeData, pendingData, allData] = await Promise.all([
+        challengesApi.getActiveChallenges(),
+        challengesApi.getPendingChallenges(),
+        challengesApi.getChallenges()
+      ]);
 
-      // Load progress for each challenge
-      for (const challenge of activeChallenges.slice(0, 3)) {
+      const activeChallenges = activeData.challenges || [];
+      const pendingChallenges = pendingData.challenges || [];
+      const allChallenges = allData.challenges || [];
+
+      // Combiner et prendre les 3 premiers (priorité : pending reçus, actifs, pending envoyés)
+      const sentPending = allChallenges.filter(c => c.status === 'pending');
+      const combined = [...pendingChallenges, ...activeChallenges, ...sentPending]
+        .filter((c, index, self) => index === self.findIndex(t => t.id === c.id)) // Remove duplicates
+        .slice(0, 3);
+
+      setChallenges(combined);
+
+      // Load progress for active challenges only
+      for (const challenge of combined.filter(c => c.status === 'active')) {
         loadProgress(challenge.id);
       }
     } catch (error) {
@@ -92,6 +107,7 @@ export default function ChallengesWidget() {
         <div className="space-y-4">
           {challenges.map((challenge) => {
             const prog = progress[challenge.id];
+            const isPending = challenge.status === 'pending';
             const daysLeft = getDaysLeft(challenge.end_date);
 
             return (
@@ -111,15 +127,24 @@ export default function ChallengesWidget() {
                       </Typography>
                     </div>
                   </div>
-                  <Chip
-                    value={`J-${daysLeft}`}
-                    size="sm"
-                    color={daysLeft <= 3 ? 'red' : daysLeft <= 7 ? 'orange' : 'blue'}
-                    className="font-semibold"
-                  />
+                  {isPending ? (
+                    <Chip
+                      value="En attente"
+                      size="sm"
+                      color="orange"
+                      className="font-semibold"
+                    />
+                  ) : (
+                    <Chip
+                      value={`J-${daysLeft}`}
+                      size="sm"
+                      color={daysLeft <= 3 ? 'red' : daysLeft <= 7 ? 'orange' : 'blue'}
+                      className="font-semibold"
+                    />
+                  )}
                 </div>
 
-                {prog && (
+                {!isPending && prog && (
                   <div className="space-y-2 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1">
