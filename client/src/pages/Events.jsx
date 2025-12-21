@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { eventsApi } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import {
   Card,
@@ -17,9 +18,10 @@ import {
   Select,
   Option,
 } from "@material-tailwind/react";
-import { PlusIcon, CalendarIcon, MapPinIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, CalendarIcon, MapPinIcon, UserGroupIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 export default function Events() {
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -80,6 +82,19 @@ export default function Events() {
       loadEvents();
     } catch (error) {
       console.error('Error unparticipating from event:', error);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
+      return;
+    }
+    try {
+      await eventsApi.deleteEvent(eventId);
+      loadEvents();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Erreur lors de la suppression de l\'événement');
     }
   };
 
@@ -175,9 +190,22 @@ export default function Events() {
                 <CardBody className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <Typography variant="h6" color="blue-gray" className="mb-1">
-                        {event.name}
-                      </Typography>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Typography variant="h6" color="blue-gray">
+                          {event.name}
+                        </Typography>
+                        {user && user.role === 'admin' && (
+                          <Button
+                            size="sm"
+                            variant="text"
+                            color="red"
+                            className="p-2"
+                            onClick={() => handleDeleteEvent(event.id)}
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <CalendarIcon className="h-4 w-4" />
                         <span>{formatDate(event.event_date)}</span>

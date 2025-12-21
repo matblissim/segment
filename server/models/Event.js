@@ -115,15 +115,15 @@ class Event {
   }
 
   /**
-   * Supprimer un événement (seulement le créateur)
+   * Supprimer un événement (créateur ou admin)
    */
-  static async delete(eventId, userId) {
-    const result = await pool.query(
-      `DELETE FROM events
-       WHERE id = $1 AND created_by = $2
-       RETURNING *`,
-      [eventId, userId]
-    );
+  static async delete(eventId, userId, isAdmin = false) {
+    const query = isAdmin
+      ? `DELETE FROM events WHERE id = $1 RETURNING *`
+      : `DELETE FROM events WHERE id = $1 AND created_by = $2 RETURNING *`;
+
+    const params = isAdmin ? [eventId] : [eventId, userId];
+    const result = await pool.query(query, params);
     return result.rows[0];
   }
 

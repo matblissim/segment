@@ -1,5 +1,6 @@
 import express from 'express';
 import Event from '../models/Event.js';
+import User from '../models/User.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -125,11 +126,15 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Supprimer un événement
+// Supprimer un événement (créateur ou admin)
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const event = await Event.delete(id, req.userId);
+
+    // Vérifier si l'utilisateur est admin
+    const isAdmin = await User.isAdmin(req.userId);
+
+    const event = await Event.delete(id, req.userId, isAdmin);
 
     if (!event) {
       return res.status(404).json({ error: 'Event not found or unauthorized' });
