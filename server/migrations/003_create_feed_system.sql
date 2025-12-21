@@ -119,23 +119,23 @@ BEGIN
         a.average_heartrate,
         a.max_heartrate,
         a.kudos_count,
-        (SELECT COUNT(*)::BIGINT FROM activity_likes WHERE activity_id = a.strava_id) as likes_count,
-        (SELECT COUNT(*)::BIGINT FROM activity_comments WHERE activity_id = a.strava_id) as comments_count,
+        (SELECT COUNT(*)::BIGINT FROM activity_likes al2 WHERE al2.activity_id = a.strava_id) as likes_count,
+        (SELECT COUNT(*)::BIGINT FROM activity_comments ac WHERE ac.activity_id = a.strava_id) as comments_count,
         EXISTS(
-            SELECT 1 FROM activity_likes
-            WHERE activity_id = a.strava_id
-            AND user_id = p_user_id
+            SELECT 1 FROM activity_likes al
+            WHERE al.activity_id = a.strava_id
+            AND al.user_id = p_user_id
         ) as user_has_liked,
         a.created_at
     FROM activities a
     JOIN users u ON a.user_id = u.id
     WHERE a.user_id IN (
         -- Amis de l'utilisateur
-        SELECT friend_id FROM friendships
-        WHERE user_id = p_user_id AND status = 'accepted'
+        SELECT f.friend_id FROM friendships f
+        WHERE f.user_id = p_user_id AND f.status = 'accepted'
         UNION
-        SELECT user_id FROM friendships
-        WHERE friend_id = p_user_id AND status = 'accepted'
+        SELECT f.user_id FROM friendships f
+        WHERE f.friend_id = p_user_id AND f.status = 'accepted'
         UNION
         -- L'utilisateur lui-même
         SELECT p_user_id
