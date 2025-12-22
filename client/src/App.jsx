@@ -9,6 +9,7 @@ import Activities from './pages/Activities';
 import Badges from './pages/Badges';
 import Challenges from './pages/Challenges';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import Friends from './pages/Friends';
 import Feed from './pages/Feed';
 import Events from './pages/Events';
@@ -85,6 +86,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               }
             />
