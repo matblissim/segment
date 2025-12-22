@@ -240,8 +240,8 @@ ANALYSE :`;
 
     // 7. Appeler Claude
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 2500,
+      model: 'claude-haiku-4-5-20251001', // Haiku: 4x moins cher, 3-5x plus rapide
+      max_tokens: 2000,
       temperature: 0.7,
       messages: [
         {
@@ -447,8 +447,8 @@ RÈGLES ABSOLUES :
 ANALYSE :`;
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1800, // Réduit pour analyse plus rapide
+      model: 'claude-haiku-4-5-20251001', // Haiku: 4x moins cher, 3-5x plus rapide
+      max_tokens: 1800,
       temperature: 0.7,
       messages: [
         {
