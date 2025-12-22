@@ -592,6 +592,27 @@ export const aiApi = {
     );
     return response.data;
   },
+
+  // Récupérer l'historique des analyses de profil
+  getProfileHistory: async (limit = 10, offset = 0) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/ai/profile-history`,
+      {
+        headers: getAuthHeaders(),
+        params: { limit, offset }
+      }
+    );
+    return response.data;
+  },
+
+  // Récupérer une analyse de profil spécifique
+  getProfileAnalysis: async (id) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/ai/profile-history/${id}`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
 };
 
 // Profile API (configuration utilisateur)

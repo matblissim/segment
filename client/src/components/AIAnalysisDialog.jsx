@@ -1,5 +1,5 @@
 import { Dialog, DialogHeader, DialogBody, DialogFooter, Button, Typography, Spinner, Progress } from '@material-tailwind/react';
-import { SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, XMarkIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect, useRef } from 'react';
 import { aiApi } from '../services/api';
 
@@ -22,20 +22,47 @@ export default function AIAnalysisDialog({ open, onClose, activityId, activityNa
     }
   }, [open, activityId, isProfileAnalysis]);
 
+  const downloadAnalysis = () => {
+    if (!analysis) return;
+
+    const date = new Date().toLocaleDateString('fr-FR');
+    const time = new Date().toLocaleTimeString('fr-FR');
+    const title = isProfileAnalysis
+      ? `Analyse IA - Profil Global`
+      : `Analyse IA - ${activityName || 'Activité'}`;
+
+    const content = `${title}\nGénéré le ${date} à ${time}\n\n${'='.repeat(60)}\n\n${analysis}`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analyse-ia-${isProfileAnalysis ? 'profil' : 'activite'}-${date.replace(/\//g, '-')}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const loadAnalysis = async () => {
     setLoading(true);
     setError(null);
     setAnalysis(null);
     setProgress(0);
 
-    // Simulate progress: gradually increase from 0 to 90% during loading
-    // The last 10% will complete when the API responds
+    // Simulate progress: gradually increase from 0 to 95% during loading
+    // Profile analysis takes longer (10-15s), so we use slower progression
+    const isSlowAnalysis = isProfileAnalysis;
+    const incrementAmount = isSlowAnalysis ? 3 : 8; // Slower for profile
+    const intervalDuration = isSlowAnalysis ? 800 : 500; // Longer intervals for profile
+    const stopAt = 95; // Stop at 95% until API responds
+
     progressIntervalRef.current = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 90) return 90; // Stop at 90% until API responds
-        return prev + 10;
+        if (prev >= stopAt) return stopAt;
+        return Math.min(prev + incrementAmount, stopAt);
       });
-    }, 500); // Update every 500ms
+    }, intervalDuration);
 
     try {
       let result;
@@ -177,10 +204,18 @@ export default function AIAnalysisDialog({ open, onClose, activityId, activityNa
                 className="mb-2"
               />
               <Typography variant="small" color="gray" className="text-center">
-                {progress}% - {progress < 30 ? 'Récupération des données...' :
-                             progress < 60 ? 'Analyse en cours...' :
-                             progress < 90 ? 'Génération du feedback...' :
-                             'Finalisation...'}
+                {progress}% - {
+                  isProfileAnalysis
+                    ? (progress < 25 ? 'Récupération de votre historique (60 activités)...' :
+                       progress < 50 ? 'Calcul des tendances hebdomadaires...' :
+                       progress < 75 ? 'Analyse approfondie des patterns...' :
+                       progress < 95 ? 'Génération du rapport détaillé...' :
+                       'Finalisation...')
+                    : (progress < 30 ? 'Récupération des données...' :
+                       progress < 60 ? 'Analyse en cours...' :
+                       progress < 90 ? 'Génération du feedback...' :
+                       'Finalisation...')
+                }
               </Typography>
             </div>
 
@@ -226,21 +261,34 @@ export default function AIAnalysisDialog({ open, onClose, activityId, activityNa
         )}
       </DialogBody>
 
-      <DialogFooter className="border-t border-gray-200">
+      <DialogFooter className="border-t border-gray-200 flex items-center justify-between">
         <Button variant="text" color="gray" onClick={onClose}>
           Fermer
         </Button>
-        {analysis && (
-          <Button
-            variant="gradient"
-            color="purple"
-            onClick={loadAnalysis}
-            className="flex items-center gap-2"
-          >
-            <SparklesIcon className="h-4 w-4" />
-            Régénérer
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {analysis && (
+            <>
+              <Button
+                variant="outlined"
+                color="purple"
+                onClick={downloadAnalysis}
+                className="flex items-center gap-2"
+              >
+                <ArrowDownTrayIcon className="h-4 w-4" />
+                Télécharger
+              </Button>
+              <Button
+                variant="gradient"
+                color="purple"
+                onClick={loadAnalysis}
+                className="flex items-center gap-2"
+              >
+                <SparklesIcon className="h-4 w-4" />
+                Régénérer
+              </Button>
+            </>
+          )}
+        </div>
       </DialogFooter>
     </Dialog>
   );

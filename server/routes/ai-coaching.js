@@ -460,6 +460,13 @@ ANALYSE :`;
 
     const analysis = message.content[0].text;
 
+    // Sauvegarder l'analyse dans l'historique
+    await pool.query(
+      `INSERT INTO profile_ai_analyses (user_id, analysis_text, profile_data, created_at)
+       VALUES ($1, $2, $3, NOW())`,
+      [userId, analysis, JSON.stringify(profileData)]
+    );
+
     res.json({
       analysis,
       profile_data: profileData
@@ -468,6 +475,56 @@ ANALYSE :`;
   } catch (error) {
     console.error('Error analyzing profile:', error);
     res.status(500).json({ error: 'Failed to analyze profile', details: error.message });
+  }
+});
+
+// Récupérer l'historique des analyses de profil
+router.get('/profile-history', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const result = await pool.query(
+      `SELECT id, analysis_text, created_at
+       FROM profile_ai_analyses
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [userId, limit, offset]
+    );
+
+    res.json({
+      history: result.rows,
+      count: result.rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching profile analysis history:', error);
+    res.status(500).json({ error: 'Failed to fetch profile analysis history' });
+  }
+});
+
+// Récupérer une analyse de profil spécifique
+router.get('/profile-history/:id', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `SELECT id, analysis_text, profile_data, created_at
+       FROM profile_ai_analyses
+       WHERE id = $1 AND user_id = $2`,
+      [id, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Analysis not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching profile analysis:', error);
+    res.status(500).json({ error: 'Failed to fetch profile analysis' });
   }
 });
 
