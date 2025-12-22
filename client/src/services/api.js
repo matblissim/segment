@@ -593,3 +593,25 @@ export const aiApi = {
     return response.data;
   },
 };
+
+// Profile API (configuration utilisateur)
+export const profileApi = {
+  // Récupérer le profil utilisateur avec zones FC
+  getProfile: async () => {
+    const response = await axios.get(
+      `${API_BASE_URL}/profile`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Mettre à jour la FC max (recalcule automatiquement les zones)
+  updateMaxHeartRate: async (maxHeartRate) => {
+    const response = await axios.put(
+      `${API_BASE_URL}/profile`,
+      { max_heartrate: maxHeartRate },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+};
