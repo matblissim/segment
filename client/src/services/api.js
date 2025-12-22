@@ -588,7 +588,10 @@ export const aiApi = {
     const response = await axios.post(
       `${API_BASE_URL}/ai/analyze-profile`,
       {},
-      { headers: getAuthHeaders() }
+      {
+        headers: getAuthHeaders(),
+        timeout: 120000 // 2 minutes pour l'analyse IA complète
+      }
     );
     return response.data;
   },

@@ -206,10 +206,10 @@ export default function AIAnalysisDialog({ open, onClose, activityId, activityNa
               <Typography variant="small" color="gray" className="text-center">
                 {progress}% - {
                   isProfileAnalysis
-                    ? (progress < 25 ? 'Récupération de votre historique (60 activités)...' :
+                    ? (progress < 25 ? 'Récupération de votre historique (30 activités)...' :
                        progress < 50 ? 'Calcul des tendances hebdomadaires...' :
-                       progress < 75 ? 'Analyse approfondie des patterns...' :
-                       progress < 95 ? 'Génération du rapport détaillé...' :
+                       progress < 75 ? 'Analyse des patterns...' :
+                       progress < 95 ? 'Génération du rapport...' :
                        'Finalisation...')
                     : (progress < 30 ? 'Récupération des données...' :
                        progress < 60 ? 'Analyse en cours...' :

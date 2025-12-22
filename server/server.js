@@ -110,9 +110,12 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   console.log('📊 Database: PostgreSQL');
   console.log('⚡ Cache: Redis');
   console.log('👷 Worker: BullMQ running');
 });
+
+// Augmenter le timeout pour les analyses IA longues (2 minutes)
+server.timeout = 120000;

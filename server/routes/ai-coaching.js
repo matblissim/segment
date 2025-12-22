@@ -277,7 +277,7 @@ router.post('/analyze-profile', async (req, res) => {
   try {
     const userId = req.userId;
 
-    // Récupérer les 60 dernières activités pour analyse de tendance
+    // Récupérer les 30 dernières activités pour analyse rapide
     const allActivitiesResult = await pool.query(`
       SELECT
         start_date,
@@ -291,7 +291,7 @@ router.post('/analyze-profile', async (req, res) => {
       FROM activities
       WHERE user_id = $1
       ORDER BY start_date DESC
-      LIMIT 60
+      LIMIT 30
     `, [userId]);
 
     const allActivities = allActivitiesResult.rows;
@@ -367,7 +367,7 @@ router.post('/analyze-profile', async (req, res) => {
           count: runs365d.length,
           km: runs365d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1)
         },
-        recent: runActivities.slice(0, 10).map(a => ({
+        recent: runActivities.slice(0, 5).map(a => ({
           date: a.start_date,
           km: parseFloat(a.distance_km).toFixed(1),
           d_plus: a.total_elevation_gain,
@@ -448,7 +448,7 @@ ANALYSE :`;
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 3000,
+      max_tokens: 1800, // Réduit pour analyse plus rapide
       temperature: 0.7,
       messages: [
         {
