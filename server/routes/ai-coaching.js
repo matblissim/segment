@@ -23,7 +23,7 @@ function calculateHRZones(streams, maxHR) {
     z2: { min: Math.round(maxHR * 0.60), max: Math.round(maxHR * 0.70), time: 0 },
     z3: { min: Math.round(maxHR * 0.70), max: Math.round(maxHR * 0.80), time: 0 },
     z4: { min: Math.round(maxHR * 0.80), max: Math.round(maxHR * 0.90), time: 0 },
-    z5: { min: Math.round(maxHR * 0.90), max: 220, time: 0 },
+    z5: { min: Math.round(maxHR * 0.90), max: maxHR, time: 0 },
   };
 
   streams.heartrate.data.forEach(hr => {
@@ -296,6 +296,22 @@ router.post('/analyze-profile', async (req, res) => {
 
     const allActivities = allActivitiesResult.rows;
 
+    // Récupérer la FC max de l'utilisateur pour les zones
+    const userResult = await pool.query(
+      'SELECT max_heartrate FROM users WHERE id = $1',
+      [userId]
+    );
+    const userMaxHR = userResult.rows[0].max_heartrate || 190;
+
+    // Calculer les zones FC personnalisées
+    const hrZones = {
+      z1: { min: 0, max: Math.round(userMaxHR * 0.60), name: 'Récupération', percentage: '0-60%' },
+      z2: { min: Math.round(userMaxHR * 0.60), max: Math.round(userMaxHR * 0.70), name: 'Endurance', percentage: '60-70%' },
+      z3: { min: Math.round(userMaxHR * 0.70), max: Math.round(userMaxHR * 0.80), name: 'Tempo', percentage: '70-80%' },
+      z4: { min: Math.round(userMaxHR * 0.80), max: Math.round(userMaxHR * 0.90), name: 'Seuil', percentage: '80-90%' },
+      z5: { min: Math.round(userMaxHR * 0.90), max: userMaxHR, name: 'VO2max', percentage: '90-100%' },
+    };
+
     // Séparer CAP et Vélo
     const RUNNING_TYPES = ['Run', 'TrailRun', 'VirtualRun', 'Trail'];
     const CYCLING_TYPES = ['Ride', 'VirtualRide', 'EBikeRide'];
@@ -389,7 +405,11 @@ router.post('/analyze-profile', async (req, res) => {
           km: rides365d.reduce((sum, a) => sum + parseFloat(a.distance_km || 0), 0).toFixed(1)
         }
       },
-      weekly_progression: weeklyLoads
+      weekly_progression: weeklyLoads,
+      hr_config: {
+        max_hr: userMaxHR,
+        zones: hrZones
+      }
     };
 
     // Prompt ULTRA-INTELLIGENT pour analyse profonde
@@ -423,6 +443,14 @@ ANALYSE OBLIGATOIRE ULTRA-DÉTAILLÉE :
    - FC moyenne : trop haute (surentraînement) ou basse (sous-régime) ?
    - Après un pic, récup suffisante ? Ou rechargé trop vite ?
    - Détecter fatigue chronique si FC élevée + volume important
+
+4bis. **ZONES CARDIAQUES PERSONNALISÉES** (FC max configurée : ${userMaxHR} bpm) :
+   - Z1 (${hrZones.z1.min}-${hrZones.z1.max} bpm) : Récupération - séances faciles, récup active
+   - Z2 (${hrZones.z2.min}-${hrZones.z2.max} bpm) : Endurance fondamentale - base de l'entraînement
+   - Z3 (${hrZones.z3.min}-${hrZones.z3.max} bpm) : Tempo - allure marathon
+   - Z4 (${hrZones.z4.min}-${hrZones.z4.max} bpm) : Seuil - efforts soutenus
+   - Z5 (${hrZones.z5.min}-${hrZones.z5.max} bpm) : VO2max - intervalles courts, max effort
+   - ANALYSE : Trop de Z4-Z5 = surentraînement. Pas assez de Z2 = mauvaise base aérobie.
 
 5. **RISQUES IDENTIFIÉS** (sois ALARMISTE si nécessaire) :
    - Blessure imminente ? (progression trop rapide, volume excessif)

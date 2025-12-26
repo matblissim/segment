@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
       z2: { min: Math.round(maxHR * 0.60), max: Math.round(maxHR * 0.70), name: 'Endurance', percentage: '60-70%' },
       z3: { min: Math.round(maxHR * 0.70), max: Math.round(maxHR * 0.80), name: 'Tempo', percentage: '70-80%' },
       z4: { min: Math.round(maxHR * 0.80), max: Math.round(maxHR * 0.90), name: 'Seuil', percentage: '80-90%' },
-      z5: { min: Math.round(maxHR * 0.90), max: 220, name: 'VO2max', percentage: '90%+' },
+      z5: { min: Math.round(maxHR * 0.90), max: maxHR, name: 'VO2max', percentage: '90-100%' },
     };
 
     res.json({
@@ -76,7 +76,7 @@ router.put('/', async (req, res) => {
       z2: { min: Math.round(max_heartrate * 0.60), max: Math.round(max_heartrate * 0.70), name: 'Endurance', percentage: '60-70%' },
       z3: { min: Math.round(max_heartrate * 0.70), max: Math.round(max_heartrate * 0.80), name: 'Tempo', percentage: '70-80%' },
       z4: { min: Math.round(max_heartrate * 0.80), max: Math.round(max_heartrate * 0.90), name: 'Seuil', percentage: '80-90%' },
-      z5: { min: Math.round(max_heartrate * 0.90), max: 220, name: 'VO2max', percentage: '90%+' },
+      z5: { min: Math.round(max_heartrate * 0.90), max: max_heartrate, name: 'VO2max', percentage: '90-100%' },
     };
 
     res.json({
