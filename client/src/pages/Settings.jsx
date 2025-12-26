@@ -162,9 +162,29 @@ export default function Settings() {
               </Typography>
             </div>
 
-            <Typography variant="small" color="gray" className="italic">
-              💡 Si vous ne connaissez pas votre FC max, utilisez la formule : 220 - votre âge
-            </Typography>
+            <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-600 rounded">
+              <Typography variant="small" color="blue-gray" className="font-semibold mb-2">
+                📊 Comment mesurer votre FC max (test sur le terrain)
+              </Typography>
+              <Typography variant="small" color="gray" className="mb-2">
+                <strong>Protocole recommandé - Test en côte (15-20 min)</strong>
+              </Typography>
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                <li>Échauffement 15 min facile</li>
+                <li>Trouvez une côte de 3-5% sur 400-800m</li>
+                <li>1ère montée à 90% (effort contrôlé), récup 2 min en trottinant</li>
+                <li>2ème montée à 95% (effort soutenu), récup 2 min</li>
+                <li>3ème montée à 100% ALL-OUT jusqu'à épuisement (sprint final 100m)</li>
+                <li>Le pic FC atteint dans la 3ème montée = votre FC max</li>
+              </ul>
+              <Typography variant="small" color="gray" className="mt-2 italic">
+                ⚠️ Test exigeant, faites-le en bonne forme et échauffé. Notez la FC max observée.
+              </Typography>
+              <Typography variant="small" color="gray" className="mt-2">
+                <strong>Méthode zones:</strong> Zones à % de FC max (méthode Coggan/Friel).
+                Z1: 0-60% (récup), Z2: 60-70% (endurance), Z3: 70-80% (tempo), Z4: 80-90% (seuil), Z5: 90-100% (VO2max).
+              </Typography>
+            </div>
           </div>
 
           {/* Zones FC calculées automatiquement */}
