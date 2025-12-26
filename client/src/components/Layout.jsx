@@ -13,6 +13,15 @@ import {
 import {
   ArrowPathIcon,
   ArrowRightOnRectangleIcon,
+  HomeIcon,
+  RectangleStackIcon,
+  TrophyIcon,
+  UserGroupIcon,
+  FireIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  UserCircleIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/solid";
 
 export default function Layout({ children, showSportToggle = true }) {
@@ -67,6 +76,17 @@ export default function Layout({ children, showSportToggle = true }) {
   };
 
   const isActive = (path) => location.pathname === path;
+
+  const menuItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
+    { path: '/activities', label: 'Activités', icon: RectangleStackIcon },
+    { path: '/badges', label: 'Badges', icon: TrophyIcon },
+    { path: '/friends', label: 'Amis', icon: UserGroupIcon },
+    { path: '/challenges', label: 'Challenges', icon: FireIcon },
+    { path: '/events', label: 'Événements', icon: CalendarIcon },
+    { path: '/stats', label: 'Stats', icon: ChartBarIcon },
+    { path: '/profile', label: 'Profil', icon: UserCircleIcon },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -177,98 +197,40 @@ export default function Layout({ children, showSportToggle = true }) {
           </div>
         )}
 
-        {/* Navigation Tabs */}
-        <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 border-t border-gray-200">
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-            <Link to="/dashboard" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/dashboard') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Dashboard
-              </Button>
-            </Link>
-            <Link to="/activities" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/activities') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Activités
-              </Button>
-            </Link>
-            <Link to="/badges" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/badges') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Badges
-              </Button>
-            </Link>
-            <Link to="/friends" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/friends') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Amis
-              </Button>
-            </Link>
-            <Link to="/challenges" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/challenges') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Challenges
-              </Button>
-            </Link>
-            <Link to="/events" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/events') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Événements
-              </Button>
-            </Link>
-            <Link to="/stats" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/stats') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Stats
-              </Button>
-            </Link>
-            <Link to="/profile" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/profile') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Profil
-              </Button>
-            </Link>
+        {/* Navigation Tabs - Mobile-friendly */}
+        <div className="mx-auto max-w-7xl px-1 sm:px-4 lg:px-8 border-t border-gray-200">
+          <div className="flex gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              return (
+                <Link key={item.path} to={item.path} className="flex-shrink-0">
+                  <Button
+                    color="gray"
+                    variant="text"
+                    size="sm"
+                    className={`rounded-none px-2 sm:px-4 min-w-0 ${active ? 'border-b-2 border-gray-900' : ''}`}
+                  >
+                    <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2">
+                      <Icon className="h-4 w-4 sm:h-4 sm:w-4" />
+                      <span className="text-[10px] sm:text-sm whitespace-nowrap">{item.label}</span>
+                    </div>
+                  </Button>
+                </Link>
+              );
+            })}
             {user?.role === 'admin' && (
               <Link to="/admin" className="flex-shrink-0">
                 <Button
                   color="gray"
                   variant="text"
                   size="sm"
-                  className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/admin') ? 'border-b-2 border-gray-900' : ''}`}
+                  className={`rounded-none px-2 sm:px-4 min-w-0 ${isActive('/admin') ? 'border-b-2 border-gray-900' : ''}`}
                 >
-                  Admin
+                  <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2">
+                    <Cog6ToothIcon className="h-4 w-4 sm:h-4 sm:w-4" />
+                    <span className="text-[10px] sm:text-sm whitespace-nowrap">Admin</span>
+                  </div>
                 </Button>
               </Link>
             )}
