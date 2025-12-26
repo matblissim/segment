@@ -260,16 +260,6 @@ export default function Layout({ children, showSportToggle = true }) {
                 Profil
               </Button>
             </Link>
-            <Link to="/settings" className="flex-shrink-0">
-              <Button
-                color="gray"
-                variant="text"
-                size="sm"
-                className={`rounded-none whitespace-nowrap text-xs sm:text-sm ${isActive('/settings') ? 'border-b-2 border-gray-900' : ''}`}
-              >
-                Paramètres
-              </Button>
-            </Link>
             {user?.role === 'admin' && (
               <Link to="/admin" className="flex-shrink-0">
                 <Button
