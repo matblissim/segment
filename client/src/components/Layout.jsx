@@ -9,6 +9,7 @@ import {
   Button,
   Chip,
   Typography,
+  Drawer,
 } from "@material-tailwind/react";
 import {
   ArrowPathIcon,
@@ -22,6 +23,9 @@ import {
   ChartBarIcon,
   UserCircleIcon,
   Cog6ToothIcon,
+  Bars3Icon,
+  XMarkIcon,
+  NewspaperIcon,
 } from "@heroicons/react/24/solid";
 
 export default function Layout({ children, showSportToggle = true }) {
@@ -30,6 +34,7 @@ export default function Layout({ children, showSportToggle = true }) {
   const location = useLocation();
   const [syncing, setSyncing] = useState(false);
   const [syncInfo, setSyncInfo] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     loadSyncInfo();
@@ -77,7 +82,25 @@ export default function Layout({ children, showSportToggle = true }) {
 
   const isActive = (path) => location.pathname === path;
 
-  const menuItems = [
+  // Bottom Nav (4 items max - most important pages)
+  const bottomNavItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
+    { path: '/activities', label: 'Activités', icon: RectangleStackIcon },
+    { path: '/challenges', label: 'Challenges', icon: FireIcon },
+    { path: '/profile', label: 'Profil', icon: UserCircleIcon },
+  ];
+
+  // Burger Menu (secondary pages)
+  const drawerMenuItems = [
+    { path: '/badges', label: 'Badges', icon: TrophyIcon },
+    { path: '/friends', label: 'Amis', icon: UserGroupIcon },
+    { path: '/events', label: 'Événements', icon: CalendarIcon },
+    { path: '/stats', label: 'Stats', icon: ChartBarIcon },
+    { path: '/feed', label: 'Feed', icon: NewspaperIcon },
+  ];
+
+  // Desktop menu (all items)
+  const desktopMenuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
     { path: '/activities', label: 'Activités', icon: RectangleStackIcon },
     { path: '/badges', label: 'Badges', icon: TrophyIcon },
@@ -167,6 +190,16 @@ export default function Layout({ children, showSportToggle = true }) {
               >
                 <ArrowRightOnRectangleIcon className="h-4 w-4" />
               </IconButton>
+              {/* Burger Menu Icon - Mobile only */}
+              <IconButton
+                size="sm"
+                color="gray"
+                variant="text"
+                onClick={() => setDrawerOpen(true)}
+                className="md:hidden"
+              >
+                <Bars3Icon className="h-5 w-5" />
+              </IconButton>
             </div>
           </div>
         </nav>
@@ -197,39 +230,39 @@ export default function Layout({ children, showSportToggle = true }) {
           </div>
         )}
 
-        {/* Navigation Tabs - Mobile-friendly */}
-        <div className="mx-auto max-w-7xl px-1 sm:px-4 lg:px-8 border-t border-gray-200">
-          <div className="flex gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
-            {menuItems.map((item) => {
+        {/* Navigation Tabs - Desktop only */}
+        <div className="hidden md:block mx-auto max-w-7xl px-4 lg:px-8 border-t border-gray-200">
+          <div className="flex gap-1">
+            {desktopMenuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.path);
               return (
-                <Link key={item.path} to={item.path} className="flex-shrink-0">
+                <Link key={item.path} to={item.path}>
                   <Button
                     color="gray"
                     variant="text"
                     size="sm"
-                    className={`rounded-none px-2 sm:px-4 min-w-0 ${active ? 'border-b-2 border-gray-900' : ''}`}
+                    className={`rounded-none px-4 ${active ? 'border-b-2 border-gray-900' : ''}`}
                   >
-                    <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2">
-                      <Icon className="h-4 w-4 sm:h-4 sm:w-4" />
-                      <span className="text-[10px] sm:text-sm whitespace-nowrap">{item.label}</span>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4" />
+                      <span className="text-sm whitespace-nowrap">{item.label}</span>
                     </div>
                   </Button>
                 </Link>
               );
             })}
             {user?.role === 'admin' && (
-              <Link to="/admin" className="flex-shrink-0">
+              <Link to="/admin">
                 <Button
                   color="gray"
                   variant="text"
                   size="sm"
-                  className={`rounded-none px-2 sm:px-4 min-w-0 ${isActive('/admin') ? 'border-b-2 border-gray-900' : ''}`}
+                  className={`rounded-none px-4 ${isActive('/admin') ? 'border-b-2 border-gray-900' : ''}`}
                 >
-                  <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2">
-                    <Cog6ToothIcon className="h-4 w-4 sm:h-4 sm:w-4" />
-                    <span className="text-[10px] sm:text-sm whitespace-nowrap">Admin</span>
+                  <div className="flex items-center gap-2">
+                    <Cog6ToothIcon className="h-4 w-4" />
+                    <span className="text-sm whitespace-nowrap">Admin</span>
                   </div>
                 </Button>
               </Link>
@@ -239,9 +272,104 @@ export default function Layout({ children, showSportToggle = true }) {
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+      <main className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-4 sm:py-8 pb-20 md:pb-8">
         {children}
       </main>
+
+      {/* Burger Menu Drawer - Mobile only */}
+      <Drawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        placement="right"
+        className="p-4"
+        size={280}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <Typography variant="h5" color="blue-gray">
+            Menu
+          </Typography>
+          <IconButton
+            variant="text"
+            color="gray"
+            onClick={() => setDrawerOpen(false)}
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </IconButton>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {drawerMenuItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <Button
+                  color="gray"
+                  variant={active ? "filled" : "text"}
+                  className="w-full justify-start normal-case"
+                  size="lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-5 w-5" />
+                    <span>{item.label}</span>
+                  </div>
+                </Button>
+              </Link>
+            );
+          })}
+
+          {user?.role === 'admin' && (
+            <Link
+              to="/admin"
+              onClick={() => setDrawerOpen(false)}
+            >
+              <Button
+                color="gray"
+                variant={isActive('/admin') ? "filled" : "text"}
+                className="w-full justify-start normal-case"
+                size="lg"
+              >
+                <div className="flex items-center gap-3">
+                  <Cog6ToothIcon className="h-5 w-5" />
+                  <span>Admin</span>
+                </div>
+              </Button>
+            </Link>
+          )}
+        </div>
+      </Drawer>
+
+      {/* Bottom Navigation Bar - Mobile only */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-50">
+        <div className="flex items-center justify-around px-2 py-2">
+          {bottomNavItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="flex-1"
+              >
+                <button
+                  className={`w-full flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-colors ${
+                    active
+                      ? 'text-gray-900 bg-gray-100'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Icon className="h-6 w-6" />
+                  <span className="text-xs font-medium">{item.label}</span>
+                </button>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
