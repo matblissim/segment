@@ -94,6 +94,7 @@ export default function ViewPlan() {
   };
 
   const getDayName = (dayNum) => {
+    // dayNum: 1=Lun, 2=Mar... 6=Sam, 0=Dim
     const days = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
     return days[dayNum];
   };

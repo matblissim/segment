@@ -62,13 +62,22 @@ class TrainingPlan {
       });
 
       // 3. Calculer les dates des séances
-      const startDate = new Date(planConfig.goalDate);
-      startDate.setDate(startDate.getDate() - (planConfig.weeksDuration * 7));
+      // Commencer au lundi de cette semaine ou au lundi prochain
+      const today = new Date();
+      const currentDay = today.getDay(); // 0=Dim, 1=Lun... 6=Sam
+      const daysUntilMonday = currentDay === 0 ? 1 : (currentDay === 1 ? 0 : 8 - currentDay);
+
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() + daysUntilMonday);
+      startDate.setHours(0, 0, 0, 0);
 
       // 4. Insérer toutes les séances
       for (const session of sessions) {
         const sessionDate = new Date(startDate);
-        sessionDate.setDate(sessionDate.getDate() + ((session.week_number - 1) * 7) + session.day_of_week);
+        // day_of_week: 1=Lun, 2=Mar... 6=Sam, 0=Dim
+        // Convertir en offset depuis lundi : Lun=0, Mar=1... Dim=6
+        const dayOffset = session.day_of_week === 0 ? 6 : session.day_of_week - 1;
+        sessionDate.setDate(sessionDate.getDate() + ((session.week_number - 1) * 7) + dayOffset);
 
         await client.query(
           `INSERT INTO training_sessions (

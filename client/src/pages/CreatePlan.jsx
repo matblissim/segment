@@ -31,7 +31,7 @@ export default function CreatePlan() {
     raceType: 'route',
     weeksDuration: '12',
     sessionsPerWeek: '4',
-    availableDays: [0, 2, 4, 6], // Lundi, Mercredi, Vendredi, Dimanche
+    availableDays: [1, 3, 5, 0], // Lun, Mer, Ven, Dim (1-6 = Lun-Sam, 0 = Dim)
     crossTraining: [],
     userLevel: 'intermediate',
     maxHeartRate: '',
