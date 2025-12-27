@@ -15,115 +15,69 @@ export default function Login() {
     }
   };
 
+  const features = [
+    {
+      icon: '📊',
+      title: 'Stats & Analytics',
+      description: 'Analysez vos performances avec des graphiques détaillés par semaine, mois ou année',
+    },
+    {
+      icon: '🏆',
+      title: 'Badges',
+      description: 'Débloquez des badges pour vos exploits : Marathon, Ultra 100K, semaines à 100K+...',
+    },
+    {
+      icon: '🔥',
+      title: 'Challenges',
+      description: 'Défiez vos amis sur distance ou dénivelé. Premier à l\'objectif gagne !',
+    },
+    {
+      icon: '❤️',
+      title: 'Zones FC',
+      description: 'Configurez vos zones cardio (Z1-Z5) et suivez vos entraînements par zone',
+    },
+    {
+      icon: '👥',
+      title: 'Social',
+      description: 'Ajoutez des amis, consultez leur feed, comparez vos stats H2H',
+    },
+    {
+      icon: '📅',
+      title: 'Événements',
+      description: 'Retrouvez toutes les courses auxquelles vous avez participé',
+    },
+    {
+      icon: '📍',
+      title: 'Géolocalisation',
+      description: 'Visualisez les villes où vous vous êtes entraîné',
+    },
+    {
+      icon: '⚡',
+      title: 'Sync Auto',
+      description: 'Synchronisation automatique avec Strava en temps réel',
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4 py-12">
-      <div className="max-w-4xl w-full">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50">
+      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-12">
+        {/* Header - Compact sur mobile */}
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 mb-2 sm:mb-4 tracking-tight">
             Strava Gamification
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Suivez vos performances, débloquez des badges et visualisez votre progression sportive
+          <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto px-2">
+            Suivez vos performances, relevez des challenges et visualisez votre progression sportive
           </p>
         </div>
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-2 gap-px bg-gray-200">
-            {/* Feature 1 */}
-            <div className="bg-white p-8">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Statistiques Détaillées
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Analysez vos performances par semaine, par mois ou par année. Visualisez votre distance, dénivelé et temps d'entraînement avec des graphiques détaillés.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="bg-white p-8">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Badges de Performance
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Débloquez des badges pour vos exploits : Semi-Marathon, Marathon, Ultra 100K, semaines à 100K+, 5000D+... Tracez votre collection et vos meilleurs moments.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="bg-white p-8">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Objectifs Hebdomadaires
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Suivez vos semaines d'entraînement : volume kilométrique total, dénivelé cumulé, nombre d'activités. Identifiez vos meilleures périodes d'entraînement.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="bg-white p-8">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Géolocalisation des Activités
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    Visualisez les villes où vous vous êtes entraîné. Chaque activité affiche sa localisation réelle basée sur les coordonnées GPS.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="bg-gray-50 px-8 py-10 text-center border-t border-gray-200">
+        {/* CTA Button - Visible immédiatement sur mobile */}
+        <div className="mb-8 sm:mb-10">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 text-center border-2 border-orange-100">
             <button
               onClick={handleLogin}
               disabled={loading}
-              className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-strava hover:bg-orange-600 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-white bg-strava hover:bg-orange-600 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               {loading ? (
                 <>
@@ -135,7 +89,7 @@ export default function Login() {
                 </>
               ) : (
                 <>
-                  <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
                   </svg>
                   Se connecter avec Strava
@@ -143,16 +97,47 @@ export default function Login() {
               )}
             </button>
 
-            <p className="mt-6 text-sm text-gray-500 max-w-md mx-auto">
-              Connexion sécurisée via Strava. Vos données restent privées et ne sont jamais partagées.
+            <p className="mt-4 text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
+              🔒 Connexion sécurisée • Vos données restent privées
             </p>
           </div>
         </div>
 
+        {/* Features - Layout optimisé mobile */}
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="p-4 sm:p-6 bg-gradient-to-r from-orange-500 to-blue-500">
+            <h2 className="text-xl sm:text-2xl font-bold text-white text-center">
+              Toutes les fonctionnalités
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-gray-200">
+            {features.map((feature, index) => (
+              <div key={index} className="bg-white p-4 sm:p-6">
+                <div className="flex items-start space-x-3 sm:space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-100 to-blue-100 rounded-lg flex items-center justify-center text-xl sm:text-2xl">
+                      {feature.icon}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-1">
+                      {feature.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-gray-500">
-            Synchronisation automatique avec vos activités Strava • Données mises à jour en temps réel
+        <div className="text-center mt-6 sm:mt-8">
+          <p className="text-xs sm:text-sm text-gray-500 px-4">
+            ⚡ Synchronisation automatique • 📊 Données en temps réel • 🎯 100% gratuit
           </p>
         </div>
       </div>
