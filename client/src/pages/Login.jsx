@@ -99,6 +99,10 @@ export default function Login() {
 
             <p className="mt-4 text-xs sm:text-sm text-gray-500 max-w-md mx-auto">
               🔒 Connexion sécurisée • Vos données restent privées
+              <br />
+              <a href="/privacy" className="text-blue-600 hover:underline mt-2 inline-block">
+                Politique de confidentialité
+              </a>
             </p>
           </div>
         </div>
@@ -135,9 +139,18 @@ export default function Login() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 sm:mt-8">
+        <div className="text-center mt-6 sm:mt-8 space-y-3">
           <p className="text-xs sm:text-sm text-gray-500 px-4">
             ⚡ Synchronisation automatique • 📊 Données en temps réel • 🎯 100% gratuit
+          </p>
+          <p className="text-xs text-gray-400">
+            <a href="/privacy" className="hover:text-blue-600 hover:underline">
+              Politique de confidentialité
+            </a>
+            {' • '}
+            <a href="https://www.strava.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline">
+              Strava Privacy
+            </a>
           </p>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SportFilterProvider } from './contexts/SportFilterContext';
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
+import Privacy from './pages/Privacy';
 import Dashboard from './pages/Dashboard';
 import Stats from './pages/Stats';
 import Activities from './pages/Activities';
@@ -40,6 +41,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route
               path="/dashboard"
               element={
