@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { plansApi } from '../services/api';
 import Layout from '../components/Layout';
-import { Card, CardBody, Typography, Button, Progress } from "@material-tailwind/react";
-import { CalendarIcon, TrophyIcon, PlusIcon } from "@heroicons/react/24/solid";
+import { Card, CardBody, Typography, Button, Progress, IconButton } from "@material-tailwind/react";
+import { CalendarIcon, TrophyIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 export default function Plans() {
+  const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +22,20 @@ export default function Plans() {
       console.error('Error loading plans:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeletePlan = async (planId, e) => {
+    e.stopPropagation(); // Empêcher la navigation vers le détail
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce plan ?')) {
+      return;
+    }
+    try {
+      await plansApi.deletePlan(planId);
+      loadPlans();
+    } catch (error) {
+      console.error('Error deleting plan:', error);
+      alert('Erreur lors de la suppression du plan');
     }
   };
 
@@ -82,7 +97,11 @@ export default function Plans() {
               );
 
               return (
-                <Card key={plan.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={plan.id}
+                  className="hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/plans/${plan.id}`)}
+                >
                   <CardBody>
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0">
@@ -98,12 +117,22 @@ export default function Plans() {
                           </div>
                         )}
                       </div>
-                      <div className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ml-2 ${
-                        daysUntilRace > 14 ? 'bg-blue-100 text-blue-700' :
-                        daysUntilRace > 7 ? 'bg-orange-100 text-orange-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        J-{daysUntilRace}
+                      <div className="flex items-center gap-2 ml-2">
+                        <div className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                          daysUntilRace > 14 ? 'bg-blue-100 text-blue-700' :
+                          daysUntilRace > 7 ? 'bg-orange-100 text-orange-700' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          J-{daysUntilRace}
+                        </div>
+                        <IconButton
+                          size="sm"
+                          variant="text"
+                          color="red"
+                          onClick={(e) => handleDeletePlan(plan.id, e)}
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </IconButton>
                       </div>
                     </div>
 

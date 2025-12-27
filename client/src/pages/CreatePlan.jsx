@@ -115,7 +115,7 @@ export default function CreatePlan() {
       const planConfig = {
         eventId: eventId ? parseInt(eventId) : null,
         name: formData.name,
-        goalDistance: parseFloat(formData.goalDistance) * 1000, // Convert km to m
+        goalDistance: parseFloat(formData.goalDistance), // En km, le backend convertira en mètres
         goalElevation: formData.goalElevation ? parseInt(formData.goalElevation) : 0,
         goalDate: formData.goalDate,
         goalPace: formData.goalPace ? parseInt(formData.goalPace) : null,

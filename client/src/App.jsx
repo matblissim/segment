@@ -17,6 +17,7 @@ import Admin from './pages/Admin';
 import AdminUserView from './pages/AdminUserView';
 import Plans from './pages/Plans';
 import CreatePlan from './pages/CreatePlan';
+import ViewPlan from './pages/ViewPlan';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -129,6 +130,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CreatePlan />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/plans/:planId"
+              element={
+                <ProtectedRoute>
+                  <ViewPlan />
                 </ProtectedRoute>
               }
             />
