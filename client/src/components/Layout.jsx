@@ -191,15 +191,16 @@ export default function Layout({ children, showSportToggle = true }) {
                 <ArrowRightOnRectangleIcon className="h-4 w-4" />
               </IconButton>
               {/* Burger Menu Icon - Mobile only */}
-              <IconButton
-                size="sm"
-                color="gray"
-                variant="text"
-                onClick={() => setDrawerOpen(true)}
-                className="md:hidden"
-              >
-                <Bars3Icon className="h-5 w-5" />
-              </IconButton>
+              <div className="md:hidden">
+                <IconButton
+                  size="sm"
+                  color="gray"
+                  variant="text"
+                  onClick={() => setDrawerOpen(true)}
+                >
+                  <Bars3Icon className="h-5 w-5" />
+                </IconButton>
+              </div>
             </div>
           </div>
         </nav>
