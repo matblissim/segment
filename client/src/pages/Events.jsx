@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { eventsApi } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
@@ -241,50 +242,66 @@ export default function Events() {
                     </Typography>
                   )}
 
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <UserGroupIcon className="h-4 w-4" />
-                      <span>{event.participants_count || 0} participant{event.participants_count > 1 ? 's' : ''}</span>
-                      <span className="text-xs text-gray-400">• {event.creator_username}</span>
-                    </div>
+                  <div className="flex flex-col gap-3 pt-3 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <UserGroupIcon className="h-4 w-4" />
+                        <span>{event.participants_count || 0} participant{event.participants_count > 1 ? 's' : ''}</span>
+                        <span className="text-xs text-gray-400">• {event.creator_username}</span>
+                      </div>
 
-                    {!isPast && (
-                      <div className="flex items-center gap-2">
-                        {event.is_participating ? (
-                          <>
-                            <Chip
-                              value={`Priorité ${event.user_priority}`}
-                              size="sm"
-                              color={getPriorityColor(event.user_priority)}
-                              className="font-semibold"
-                            />
-                            <select
-                              value={event.user_priority}
-                              onChange={(e) => handleParticipate(event.id, e.target.value)}
-                              className="text-xs border border-gray-300 rounded px-2 py-1"
-                            >
-                              <option value="A">A</option>
-                              <option value="B">B</option>
-                              <option value="C">C</option>
-                            </select>
+                      {!isPast && (
+                        <div className="flex items-center gap-2">
+                          {event.is_participating ? (
+                            <>
+                              <Chip
+                                value={`Priorité ${event.user_priority}`}
+                                size="sm"
+                                color={getPriorityColor(event.user_priority)}
+                                className="font-semibold"
+                              />
+                              <select
+                                value={event.user_priority}
+                                onChange={(e) => handleParticipate(event.id, e.target.value)}
+                                className="text-xs border border-gray-300 rounded px-2 py-1"
+                              >
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                              </select>
+                              <Button
+                                size="sm"
+                                variant="outlined"
+                                color="red"
+                                onClick={() => handleUnparticipate(event.id)}
+                              >
+                                Annuler
+                              </Button>
+                            </>
+                          ) : (
                             <Button
                               size="sm"
-                              variant="outlined"
-                              color="red"
-                              onClick={() => handleUnparticipate(event.id)}
+                              onClick={() => handleParticipate(event.id, 'B')}
                             >
-                              Annuler
+                              Participer
                             </Button>
-                          </>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={() => handleParticipate(event.id, 'B')}
-                          >
-                            Participer
-                          </Button>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {!isPast && event.target_distance && (
+                      <Link to={`/plans/create?eventId=${event.id}`} className="w-full">
+                        <Button
+                          size="sm"
+                          variant="outlined"
+                          color="blue"
+                          className="w-full flex items-center justify-center gap-2"
+                        >
+                          <CalendarIcon className="h-4 w-4" />
+                          Créer un plan d'entraînement
+                        </Button>
+                      </Link>
                     )}
                   </div>
                 </CardBody>

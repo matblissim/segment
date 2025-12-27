@@ -16,6 +16,7 @@ import Events from './pages/Events';
 import Admin from './pages/Admin';
 import AdminUserView from './pages/AdminUserView';
 import Plans from './pages/Plans';
+import CreatePlan from './pages/CreatePlan';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -120,6 +121,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Plans />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/plans/create"
+              element={
+                <ProtectedRoute>
+                  <CreatePlan />
                 </ProtectedRoute>
               }
             />
