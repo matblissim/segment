@@ -219,7 +219,6 @@ export default function Layout({ children, showSportToggle = true }) {
                 </IconButton>
               </div>
             </div>
-          </div>
         </nav>
 
         {/* Sport Toggle - Mobile version */}
