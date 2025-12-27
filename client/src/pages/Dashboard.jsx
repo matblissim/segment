@@ -135,7 +135,7 @@ export default function Dashboard() {
               <Typography className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {(stats.totalDistance / 1000).toFixed(0)}
               </Typography>
-              <Typography className="text-xs text-gray-500">km</Typography>
+              <Typography className="text-xs text-gray-500">km (à vie)</Typography>
             </div>
           </CardBody>
         </Card>
@@ -154,7 +154,7 @@ export default function Dashboard() {
               <Typography className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {stats.totalElevation.toFixed(0)}
               </Typography>
-              <Typography className="text-xs text-gray-500">m D+</Typography>
+              <Typography className="text-xs text-gray-500">m D+ (à vie)</Typography>
             </div>
           </CardBody>
         </Card>
@@ -213,67 +213,27 @@ export default function Dashboard() {
           </CardHeader>
           <CardBody className="pt-2 sm:pt-4 p-3 sm:p-4">
             {earnedBadges.length > 0 ? (
-              <div className="space-y-2 sm:space-y-3">
-                {earnedBadges.slice(0, 5).map((badge) => (
-                  <div key={badge.id} className="space-y-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+                {earnedBadges.slice(0, 6).map((badge) => (
+                  <div key={badge.id}>
                     <div
-                      className="flex items-center justify-between p-2 sm:p-4 rounded border border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="flex flex-col items-center p-2 sm:p-3 rounded border border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors h-full"
                       onClick={() => setExpandedBadge(expandedBadge === badge.id ? null : badge.id)}
+                      title={badge.description}
                     >
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                        <div className="min-w-0">
-                          <Typography variant="small" color="blue-gray" className="font-semibold text-xs sm:text-sm truncate">
-                            {badge.name}
-                          </Typography>
-                          <Typography variant="small" color="gray" className="font-normal text-xs hidden sm:block">
-                            {badge.description}
-                          </Typography>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="text-center min-w-0 w-full">
+                        <Typography variant="small" color="blue-gray" className="font-semibold text-xs truncate">
+                          {badge.name}
+                        </Typography>
                         <Chip
                           value={`×${badge.count}`}
                           size="sm"
                           variant="ghost"
-                          className="bg-gray-100 text-gray-900 font-semibold"
+                          className="bg-gray-100 text-gray-900 font-semibold mt-2"
                         />
                       </div>
                     </div>
 
-                    {expandedBadge === badge.id && badge.activities && badge.activities.length > 0 && (
-                      <div className="ml-4 p-3 bg-gray-50 rounded border border-gray-200">
-                        <Typography variant="small" color="blue-gray" className="font-medium mb-2">
-                          Activités ({badge.activities.length})
-                        </Typography>
-                        <div className="space-y-1 max-h-60 overflow-y-auto">
-                          {badge.activities.map((activity) => (
-                            <div key={activity.id} className="flex justify-between items-center p-2 hover:bg-white rounded">
-                              <div className="flex-1">
-                                <Typography variant="small" color="blue-gray">
-                                  {activity.name || `${activity.type} - ${new Date(activity.start_date).toLocaleDateString()}`}
-                                </Typography>
-                                <div className="flex items-center gap-2">
-                                  <Typography variant="small" color="gray">
-                                    {new Date(activity.start_date).toLocaleDateString('fr-FR')}
-                                  </Typography>
-                                  {activity.city && (
-                                    <>
-                                      <span className="text-gray-400">•</span>
-                                      <Typography variant="small" color="gray">
-                                        {activity.city}
-                                      </Typography>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                              <Typography variant="small" color="blue-gray" className="font-medium">
-                                {(activity.distance / 1000).toFixed(1)} km
-                              </Typography>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

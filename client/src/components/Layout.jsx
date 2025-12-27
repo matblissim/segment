@@ -120,21 +120,46 @@ export default function Layout({ children, showSportToggle = true }) {
         <nav className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8">
           {/* Mobile: Stack vertically */}
           <div className="flex flex-col sm:flex-row sm:h-16 sm:items-center sm:justify-between gap-3 py-3 sm:py-0">
-            {/* Left: User info */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <Avatar
-                src={user?.profile_photo || 'https://via.placeholder.com/150'}
-                alt={user?.firstname}
-                size="sm"
-                className="ring-2 ring-gray-200"
-              />
-              <div className="min-w-0 flex-1">
-                <Typography variant="small" color="blue-gray" className="font-semibold truncate">
-                  {user?.firstname} {user?.lastname}
-                </Typography>
-                <Typography variant="small" color="gray" className="font-normal text-xs">
-                  {syncInfo?.activityCount || 0} activités
-                </Typography>
+            {/* Left: User info (desktop only) / Logo space (mobile) */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <Avatar
+                  src={user?.profile_photo || 'https://via.placeholder.com/150'}
+                  alt={user?.firstname}
+                  size="sm"
+                  className="ring-2 ring-gray-200"
+                />
+                <div className="min-w-0 flex-1">
+                  <Typography variant="small" color="blue-gray" className="font-semibold truncate">
+                    {user?.firstname} {user?.lastname}
+                  </Typography>
+                  <Typography variant="small" color="gray" className="font-normal text-xs hidden sm:block">
+                    {syncInfo?.activityCount || 0} activités
+                  </Typography>
+                </div>
+              </div>
+
+              {/* Burger + Profile - Mobile only (RIGHT side) */}
+              <div className="md:hidden flex items-center gap-2">
+                <Link to="/profile">
+                  <IconButton
+                    size="sm"
+                    color="blue-gray"
+                    variant="outlined"
+                    className="rounded-full"
+                  >
+                    <UserCircleIcon className="h-5 w-5" />
+                  </IconButton>
+                </Link>
+                <IconButton
+                  size="md"
+                  color="blue-gray"
+                  variant="filled"
+                  onClick={() => setDrawerOpen(true)}
+                  className="rounded-lg"
+                >
+                  <Bars3Icon className="h-6 w-6" />
+                </IconButton>
               </div>
             </div>
 
@@ -162,33 +187,8 @@ export default function Layout({ children, showSportToggle = true }) {
               </div>
             )}
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-2">
-              {/* Burger Menu Icon + Profile - Mobile only */}
-              <div className="md:hidden flex items-center gap-2">
-                <Link to="/profile">
-                  <IconButton
-                    size="sm"
-                    color="blue-gray"
-                    variant="outlined"
-                    className="rounded-full"
-                  >
-                    <UserCircleIcon className="h-5 w-5" />
-                  </IconButton>
-                </Link>
-                <IconButton
-                  size="md"
-                  color="blue-gray"
-                  variant="filled"
-                  onClick={() => setDrawerOpen(true)}
-                  className="rounded-lg"
-                >
-                  <Bars3Icon className="h-6 w-6" />
-                </IconButton>
-              </div>
-
-              {/* Desktop actions */}
-              <div className="hidden md:flex items-center gap-2">
+            {/* Right: Actions - Desktop only */}
+            <div className="hidden md:flex items-center gap-2">
                 {syncInfo && (
                   <Chip
                     value={syncInfo.syncStatus === 'syncing' ? 'Sync...' : 'Sync OK'}
