@@ -85,17 +85,17 @@ export default function Layout({ children, showSportToggle = true }) {
   // Bottom Nav (4 items max - most important pages)
   const bottomNavItems = [
     { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
-    { path: '/activities', label: 'Activités', icon: RectangleStackIcon },
+    { path: '/plans', label: 'Plans', icon: CalendarIcon },
     { path: '/challenges', label: 'Challenges', icon: FireIcon },
-    { path: '/profile', label: 'Profil', icon: UserCircleIcon },
+    { path: '/badges', label: 'Badges', icon: TrophyIcon },
   ];
 
   // Burger Menu (secondary pages)
   const drawerMenuItems = [
-    { path: '/badges', label: 'Badges', icon: TrophyIcon },
+    { path: '/profile', label: 'Profil', icon: UserCircleIcon },
+    { path: '/activities', label: 'Activités', icon: RectangleStackIcon },
     { path: '/friends', label: 'Amis', icon: UserGroupIcon },
     { path: '/events', label: 'Événements', icon: CalendarIcon },
-    { path: '/plans', label: 'Plans', icon: CalendarIcon },
     { path: '/stats', label: 'Stats', icon: ChartBarIcon },
     { path: '/feed', label: 'Feed', icon: NewspaperIcon },
   ];
@@ -164,43 +164,58 @@ export default function Layout({ children, showSportToggle = true }) {
 
             {/* Right: Actions */}
             <div className="flex items-center gap-2">
-              {syncInfo && (
-                <Chip
-                  value={syncInfo.syncStatus === 'syncing' ? 'Sync...' : 'Sync OK'}
-                  color={getSyncChipColor()}
-                  variant="ghost"
+              {/* Burger Menu Icon + Profile - Mobile only */}
+              <div className="md:hidden flex items-center gap-2">
+                <Link to="/profile">
+                  <IconButton
+                    size="sm"
+                    color="blue-gray"
+                    variant="outlined"
+                    className="rounded-full"
+                  >
+                    <UserCircleIcon className="h-5 w-5" />
+                  </IconButton>
+                </Link>
+                <IconButton
+                  size="md"
+                  color="blue-gray"
+                  variant="filled"
+                  onClick={() => setDrawerOpen(true)}
+                  className="rounded-lg"
+                >
+                  <Bars3Icon className="h-6 w-6" />
+                </IconButton>
+              </div>
+
+              {/* Desktop actions */}
+              <div className="hidden md:flex items-center gap-2">
+                {syncInfo && (
+                  <Chip
+                    value={syncInfo.syncStatus === 'syncing' ? 'Sync...' : 'Sync OK'}
+                    color={getSyncChipColor()}
+                    variant="ghost"
+                    size="sm"
+                    className="capitalize"
+                  />
+                )}
+                <Button
                   size="sm"
-                  className="capitalize hidden sm:inline-flex"
-                />
-              )}
-              <Button
-                size="sm"
-                color="gray"
-                variant="text"
-                className="flex items-center gap-1 px-2"
-                onClick={handleSync}
-                disabled={syncing || syncInfo?.syncStatus === 'syncing'}
-              >
-                <ArrowPathIcon className={`h-4 w-4 ${syncing || syncInfo?.syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">Sync</span>
-              </Button>
-              <IconButton
-                size="sm"
-                color="gray"
-                variant="text"
-                onClick={logout}
-              >
-                <ArrowRightOnRectangleIcon className="h-4 w-4" />
-              </IconButton>
-              {/* Burger Menu Icon - Mobile only */}
-              <div className="md:hidden">
+                  color="gray"
+                  variant="text"
+                  className="flex items-center gap-1 px-2"
+                  onClick={handleSync}
+                  disabled={syncing || syncInfo?.syncStatus === 'syncing'}
+                >
+                  <ArrowPathIcon className={`h-4 w-4 ${syncing || syncInfo?.syncStatus === 'syncing' ? 'animate-spin' : ''}`} />
+                  <span>Sync</span>
+                </Button>
                 <IconButton
                   size="sm"
                   color="gray"
                   variant="text"
-                  onClick={() => setDrawerOpen(true)}
+                  onClick={logout}
                 >
-                  <Bars3Icon className="h-5 w-5" />
+                  <ArrowRightOnRectangleIcon className="h-4 w-4" />
                 </IconButton>
               </div>
             </div>
@@ -275,7 +290,7 @@ export default function Layout({ children, showSportToggle = true }) {
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-4 sm:py-8 pb-20 md:pb-8">
+      <main className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 py-3 sm:py-8 pb-16 md:pb-8">
         {children}
       </main>
 

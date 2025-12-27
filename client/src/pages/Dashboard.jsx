@@ -90,19 +90,19 @@ export default function Dashboard() {
   return (
     <Layout>
       {/* AI Profile Analysis Card - Compact sur mobile */}
-      <Card className="mb-4 sm:mb-6 bg-gradient-to-r from-purple-500 to-purple-700 border-0 shadow-lg">
-        <CardBody className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <Card className="mb-3 sm:mb-6 bg-gradient-to-r from-purple-500 to-purple-700 border-0 shadow-lg">
+        <CardBody className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="rounded-full bg-white/20 p-2 sm:p-3">
-                <SparklesIcon className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
+              <div className="rounded-full bg-white/20 p-1.5 sm:p-3">
+                <SparklesIcon className="h-4 w-4 sm:h-8 sm:w-8 text-white" />
               </div>
               <div>
-                <Typography variant="h6" color="white" className="font-bold text-base sm:text-xl">
-                  Analyse IA de votre profil
+                <Typography variant="h6" color="white" className="font-bold text-sm sm:text-xl">
+                  Analyse IA
                 </Typography>
-                <Typography variant="small" color="white" className="font-normal opacity-90 text-xs sm:text-sm hidden sm:block">
-                  Obtenez un feedback strict et personnalisé sur votre progression globale
+                <Typography variant="small" color="white" className="font-normal opacity-90 text-xs hidden sm:block">
+                  Feedback personnalisé sur votre progression
                 </Typography>
               </div>
             </div>
@@ -112,27 +112,27 @@ export default function Dashboard() {
               className="bg-white text-purple-700 hover:bg-gray-100 flex items-center gap-2 normal-case font-semibold w-full sm:w-auto justify-center"
               onClick={() => setShowProfileAnalysis(true)}
             >
-              <SparklesIcon className="h-4 w-4" />
-              <span className="text-sm">Analyser</span>
+              <SparklesIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-xs sm:text-sm">Analyser</span>
             </Button>
           </div>
         </CardBody>
       </Card>
 
       {/* Stats Cards - 2x2 grid sur mobile, compact */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 mb-4 sm:mb-6">
+      <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4 mb-3 sm:mb-6">
         <Card className="border border-gray-200 shadow-none">
-          <CardBody className="p-3 sm:p-4">
-            <div className="flex flex-col gap-2">
+          <CardBody className="p-2 sm:p-4">
+            <div className="flex flex-col gap-1 sm:gap-2">
               <div className="flex items-center justify-between">
-                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
+                <Typography className="text-xs font-normal text-gray-600">
                   Distance
                 </Typography>
-                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
-                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                <div className="rounded-full bg-gray-100 p-1 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 text-gray-700" />
                 </div>
               </div>
-              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+              <Typography className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {(stats.totalDistance / 1000).toFixed(0)}
               </Typography>
               <Typography className="text-xs text-gray-500">km</Typography>
@@ -141,17 +141,17 @@ export default function Dashboard() {
         </Card>
 
         <Card className="border border-gray-200 shadow-none">
-          <CardBody className="p-3 sm:p-4">
-            <div className="flex flex-col gap-2">
+          <CardBody className="p-2 sm:p-4">
+            <div className="flex flex-col gap-1 sm:gap-2">
               <div className="flex items-center justify-between">
-                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
+                <Typography className="text-xs font-normal text-gray-600">
                   Dénivelé
                 </Typography>
-                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
-                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                <div className="rounded-full bg-gray-100 p-1 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 text-gray-700" />
                 </div>
               </div>
-              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+              <Typography className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {stats.totalElevation.toFixed(0)}
               </Typography>
               <Typography className="text-xs text-gray-500">m D+</Typography>
@@ -160,17 +160,17 @@ export default function Dashboard() {
         </Card>
 
         <Card className="border border-gray-200 shadow-none">
-          <CardBody className="p-3 sm:p-4">
-            <div className="flex flex-col gap-2">
+          <CardBody className="p-2 sm:p-4">
+            <div className="flex flex-col gap-1 sm:gap-2">
               <div className="flex items-center justify-between">
-                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
+                <Typography className="text-xs font-normal text-gray-600">
                   Badges
                 </Typography>
-                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
-                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                <div className="rounded-full bg-gray-100 p-1 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 text-gray-700" />
                 </div>
               </div>
-              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+              <Typography className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {earnedBadges.length}
               </Typography>
               <Typography className="text-xs text-gray-500">débloqués</Typography>
@@ -179,17 +179,17 @@ export default function Dashboard() {
         </Card>
 
         <Card className="border border-gray-200 shadow-none">
-          <CardBody className="p-3 sm:p-4">
-            <div className="flex flex-col gap-2">
+          <CardBody className="p-2 sm:p-4">
+            <div className="flex flex-col gap-1 sm:gap-2">
               <div className="flex items-center justify-between">
-                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
+                <Typography className="text-xs font-normal text-gray-600">
                   Activités
                 </Typography>
-                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
-                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                <div className="rounded-full bg-gray-100 p-1 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 text-gray-700" />
                 </div>
               </div>
-              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+              <Typography className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {stats.activityCount}
               </Typography>
               <Typography className="text-xs text-gray-500">sorties</Typography>
@@ -198,39 +198,39 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:gap-6 lg:grid-cols-2">
         {/* Badges */}
         <Card className="border border-gray-200 shadow-none">
           <CardHeader
             floated={false}
             shadow={false}
             color="transparent"
-            className="m-0 p-6 border-b border-gray-200"
+            className="m-0 p-3 sm:p-6 border-b border-gray-200"
           >
-            <Typography variant="h6" color="blue-gray">
+            <Typography variant="h6" color="blue-gray" className="text-base sm:text-lg">
               Badges {sportFilter === 'running' ? 'Course à pied' : 'Vélo'}
             </Typography>
           </CardHeader>
-          <CardBody className="pt-4">
+          <CardBody className="pt-2 sm:pt-4 p-3 sm:p-4">
             {earnedBadges.length > 0 ? (
-              <div className="space-y-3">
-                {earnedBadges.map((badge) => (
+              <div className="space-y-2 sm:space-y-3">
+                {earnedBadges.slice(0, 5).map((badge) => (
                   <div key={badge.id} className="space-y-2">
                     <div
-                      className="flex items-center justify-between p-4 rounded border border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="flex items-center justify-between p-2 sm:p-4 rounded border border-gray-300 cursor-pointer hover:bg-gray-50 transition-colors"
                       onClick={() => setExpandedBadge(expandedBadge === badge.id ? null : badge.id)}
                     >
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <Typography variant="small" color="blue-gray" className="font-semibold">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                        <div className="min-w-0">
+                          <Typography variant="small" color="blue-gray" className="font-semibold text-xs sm:text-sm truncate">
                             {badge.name}
                           </Typography>
-                          <Typography variant="small" color="gray" className="font-normal">
+                          <Typography variant="small" color="gray" className="font-normal text-xs hidden sm:block">
                             {badge.description}
                           </Typography>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <Chip
                           value={`×${badge.count}`}
                           size="sm"
@@ -286,7 +286,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Right column: Events + Feed + Challenges */}
-        <div className="space-y-6">
+        <div className="space-y-3 sm:space-y-6">
           {/* Events Widget */}
           <EventsWidget />
 
