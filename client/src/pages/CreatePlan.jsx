@@ -54,15 +54,34 @@ export default function CreatePlan() {
       const foundEvent = data.events.find(e => e.id === parseInt(eventId));
       if (foundEvent) {
         setEvent(foundEvent);
+
+        // Calculer le nombre de semaines jusqu'à l'événement
+        const today = new Date();
+        const eventDate = new Date(foundEvent.event_date);
+        const diffTime = eventDate - today;
+        const diffWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
+        const calculatedWeeks = Math.max(4, Math.min(52, diffWeeks)); // Entre 4 et 52 semaines
+
+        // Déterminer le type de course basé sur D+/km
+        let detectedRaceType = 'route';
+        if (foundEvent.target_elevation && foundEvent.target_distance) {
+          const elevationPerKm = (foundEvent.target_elevation / foundEvent.target_distance) * 1000;
+          if (elevationPerKm > 40) {
+            detectedRaceType = 'trail';
+          }
+          if (foundEvent.target_distance > 42195 && elevationPerKm > 30) {
+            detectedRaceType = 'ultra';
+          }
+        }
+
         setFormData(prev => ({
           ...prev,
           name: `Plan ${foundEvent.name}`,
           goalDistance: foundEvent.target_distance ? (foundEvent.target_distance / 1000).toString() : '',
           goalElevation: foundEvent.target_elevation ? foundEvent.target_elevation.toString() : '',
           goalDate: foundEvent.event_date,
-          raceType: foundEvent.target_elevation && foundEvent.target_distance
-            ? (foundEvent.target_elevation / foundEvent.target_distance * 1000 > 40 ? 'trail' : 'route')
-            : 'route',
+          weeksDuration: calculatedWeeks.toString(),
+          raceType: detectedRaceType,
         }));
       }
     } catch (error) {
@@ -183,6 +202,7 @@ export default function CreatePlan() {
                     label="Distance objectif (km) *"
                     value={formData.goalDistance}
                     onChange={(e) => setFormData({ ...formData, goalDistance: e.target.value })}
+                    disabled={!!eventId}
                     required
                   />
                   <Input
@@ -190,6 +210,7 @@ export default function CreatePlan() {
                     label="Dénivelé positif (m)"
                     value={formData.goalElevation}
                     onChange={(e) => setFormData({ ...formData, goalElevation: e.target.value })}
+                    disabled={!!eventId}
                   />
                 </div>
 
@@ -198,6 +219,7 @@ export default function CreatePlan() {
                   label="Date de l'objectif *"
                   value={formData.goalDate}
                   onChange={(e) => setFormData({ ...formData, goalDate: e.target.value })}
+                  disabled={!!eventId}
                   required
                 />
 
@@ -205,6 +227,7 @@ export default function CreatePlan() {
                   label="Type de course *"
                   value={formData.raceType}
                   onChange={(value) => setFormData({ ...formData, raceType: value })}
+                  disabled={!!eventId}
                 >
                   <Option value="route">🏃 Route</Option>
                   <Option value="trail">🏔️ Trail</Option>
@@ -222,15 +245,23 @@ export default function CreatePlan() {
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Input
-                    type="number"
-                    min="4"
-                    max="52"
-                    label="Durée (semaines) *"
-                    value={formData.weeksDuration}
-                    onChange={(e) => setFormData({ ...formData, weeksDuration: e.target.value })}
-                    required
-                  />
+                  <div>
+                    <Input
+                      type="number"
+                      min="4"
+                      max="52"
+                      label="Durée (semaines) *"
+                      value={formData.weeksDuration}
+                      onChange={(e) => setFormData({ ...formData, weeksDuration: e.target.value })}
+                      disabled={!!eventId}
+                      required
+                    />
+                    {eventId && (
+                      <Typography variant="small" color="gray" className="mt-1 ml-1">
+                        Calculé automatiquement depuis l'événement
+                      </Typography>
+                    )}
+                  </div>
                   <Input
                     type="number"
                     min="3"
