@@ -89,106 +89,110 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      {/* AI Profile Analysis Card */}
-      <Card className="mb-6 bg-gradient-to-r from-purple-500 to-purple-700 border-0 shadow-lg">
-        <CardBody className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-white/20 p-3">
-                <SparklesIcon className="h-8 w-8 text-white" />
+      {/* AI Profile Analysis Card - Compact sur mobile */}
+      <Card className="mb-4 sm:mb-6 bg-gradient-to-r from-purple-500 to-purple-700 border-0 shadow-lg">
+        <CardBody className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="rounded-full bg-white/20 p-2 sm:p-3">
+                <SparklesIcon className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
               </div>
               <div>
-                <Typography variant="h5" color="white" className="font-bold">
+                <Typography variant="h6" color="white" className="font-bold text-base sm:text-xl">
                   Analyse IA de votre profil
                 </Typography>
-                <Typography variant="small" color="white" className="font-normal opacity-90">
+                <Typography variant="small" color="white" className="font-normal opacity-90 text-xs sm:text-sm hidden sm:block">
                   Obtenez un feedback strict et personnalisé sur votre progression globale
                 </Typography>
               </div>
             </div>
             <Button
-              size="lg"
+              size="sm"
               variant="filled"
-              className="bg-white text-purple-700 hover:bg-gray-100 flex items-center gap-2 normal-case font-semibold"
+              className="bg-white text-purple-700 hover:bg-gray-100 flex items-center gap-2 normal-case font-semibold w-full sm:w-auto justify-center"
               onClick={() => setShowProfileAnalysis(true)}
             >
-              <SparklesIcon className="h-5 w-5" />
-              Analyser mon profil
+              <SparklesIcon className="h-4 w-4" />
+              <span className="text-sm">Analyser</span>
             </Button>
           </div>
         </CardBody>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+      {/* Stats Cards - 2x2 grid sur mobile, compact */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 mb-4 sm:mb-6">
         <Card className="border border-gray-200 shadow-none">
-          <CardBody>
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="small" className="font-normal text-gray-600">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
                   Distance
                 </Typography>
-                <Typography variant="h4" color="blue-gray">
-                  {(stats.totalDistance / 1000).toFixed(0)} km
-                </Typography>
+                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                </div>
               </div>
-              <div className="rounded-full bg-gray-100 p-3">
-                <ChartBarIcon className="h-6 w-6 text-gray-700" />
-              </div>
+              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                {(stats.totalDistance / 1000).toFixed(0)}
+              </Typography>
+              <Typography className="text-xs text-gray-500">km</Typography>
             </div>
           </CardBody>
         </Card>
 
         <Card className="border border-gray-200 shadow-none">
-          <CardBody>
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="small" className="font-normal text-gray-600">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
                   Dénivelé
                 </Typography>
-                <Typography variant="h4" color="blue-gray">
-                  {stats.totalElevation.toFixed(0)} m
-                </Typography>
+                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                </div>
               </div>
-              <div className="rounded-full bg-gray-100 p-3">
-                <ChartBarIcon className="h-6 w-6 text-gray-700" />
-              </div>
+              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                {stats.totalElevation.toFixed(0)}
+              </Typography>
+              <Typography className="text-xs text-gray-500">m D+</Typography>
             </div>
           </CardBody>
         </Card>
 
         <Card className="border border-gray-200 shadow-none">
-          <CardBody>
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="small" className="font-normal text-gray-600">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
                   Badges
                 </Typography>
-                <Typography variant="h4" color="blue-gray">
-                  {earnedBadges.length}
-                </Typography>
+                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                </div>
               </div>
-              <div className="rounded-full bg-gray-100 p-3">
-                <ChartBarIcon className="h-6 w-6 text-gray-700" />
-              </div>
+              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                {earnedBadges.length}
+              </Typography>
+              <Typography className="text-xs text-gray-500">débloqués</Typography>
             </div>
           </CardBody>
         </Card>
 
         <Card className="border border-gray-200 shadow-none">
-          <CardBody>
-            <div className="flex items-center justify-between">
-              <div>
-                <Typography variant="small" className="font-normal text-gray-600">
+          <CardBody className="p-3 sm:p-4">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <Typography className="text-xs sm:text-sm font-normal text-gray-600">
                   Activités
                 </Typography>
-                <Typography variant="h4" color="blue-gray">
-                  {stats.activityCount}
-                </Typography>
+                <div className="rounded-full bg-gray-100 p-1.5 sm:p-2">
+                  <ChartBarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
+                </div>
               </div>
-              <div className="rounded-full bg-gray-100 p-3">
-                <ChartBarIcon className="h-6 w-6 text-gray-700" />
-              </div>
+              <Typography className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                {stats.activityCount}
+              </Typography>
+              <Typography className="text-xs text-gray-500">sorties</Typography>
             </div>
           </CardBody>
         </Card>
