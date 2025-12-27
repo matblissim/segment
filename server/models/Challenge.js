@@ -3,22 +3,14 @@ import { pool } from '../config/database.js';
 class Challenge {
   /**
    * Créer un nouveau challenge
-   * endDate est optionnel - si non fourni, défaut à startDate + 30 jours
+   * endDate est optionnel - si null, le challenge se termine quand quelqu'un atteint l'objectif
    */
   static async create(challengerId, challengedId, metric, targetValue, startDate, endDate = null) {
-    // Si pas de end_date, calculer automatiquement (start_date + 30 jours)
-    let finalEndDate = endDate;
-    if (!finalEndDate) {
-      const start = new Date(startDate);
-      start.setDate(start.getDate() + 30);
-      finalEndDate = start.toISOString().split('T')[0];
-    }
-
     const result = await pool.query(
       `INSERT INTO challenges (challenger_id, challenged_id, metric, target_value, start_date, end_date, status)
        VALUES ($1, $2, $3, $4, $5, $6, 'pending')
        RETURNING *`,
-      [challengerId, challengedId, metric, targetValue, startDate, finalEndDate]
+      [challengerId, challengedId, metric, targetValue, startDate, endDate]
     );
     return result.rows[0];
   }
@@ -102,8 +94,8 @@ class Challenge {
        JOIN users u2 ON c.challenged_id = u2.id
        WHERE (c.challenger_id = $1 OR c.challenged_id = $1)
          AND c.status = 'active'
-         AND c.end_date >= CURRENT_DATE
-       ORDER BY c.end_date ASC`,
+         AND (c.end_date IS NULL OR c.end_date >= CURRENT_DATE)
+       ORDER BY c.end_date ASC NULLS LAST`,
       [userId]
     );
     return result.rows;
@@ -148,6 +140,9 @@ class Challenge {
     const challenge = challengeResult.rows[0];
 
     // Calculer les stats pour les deux participants
+    // Si pas de end_date, utiliser la date d'aujourd'hui pour le calcul
+    const endDateForQuery = challenge.end_date || new Date().toISOString().split('T')[0];
+
     const statsQuery = `
       SELECT
         COALESCE(SUM(distance), 0) as total_distance,
@@ -159,8 +154,8 @@ class Challenge {
     `;
 
     const [challengerStats, challengedStats] = await Promise.all([
-      pool.query(statsQuery, [challenge.challenger_id, challenge.start_date, challenge.end_date]),
-      pool.query(statsQuery, [challenge.challenged_id, challenge.start_date, challenge.end_date]),
+      pool.query(statsQuery, [challenge.challenger_id, challenge.start_date, endDateForQuery]),
+      pool.query(statsQuery, [challenge.challenged_id, challenge.start_date, endDateForQuery]),
     ]);
 
     const challengerValue = challenge.metric === 'distance'

@@ -48,6 +48,12 @@ export default function Challenges() {
     try {
       const prog = await challengesApi.getProgress(challengeId);
       setProgress(prev => ({ ...prev, [challengeId]: prog }));
+
+      // Si le challenge est passé à "completed", recharger la liste
+      if (prog.challenge.status === 'completed') {
+        // Petit délai pour laisser le temps à la BDD de se mettre à jour
+        setTimeout(() => loadChallenges(), 500);
+      }
     } catch (error) {
       console.error('Error loading progress:', error);
     }
@@ -150,7 +156,10 @@ export default function Challenges() {
               <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                 <ClockIcon className="h-4 w-4" />
                 <span>
-                  {new Date(challenge.start_date).toLocaleDateString('fr-FR')} - {new Date(challenge.end_date).toLocaleDateString('fr-FR')}
+                  {challenge.end_date
+                    ? `${new Date(challenge.start_date).toLocaleDateString('fr-FR')} - ${new Date(challenge.end_date).toLocaleDateString('fr-FR')}`
+                    : `Depuis le ${new Date(challenge.start_date).toLocaleDateString('fr-FR')} • Premier à l'objectif`
+                  }
                 </span>
               </div>
             </div>
