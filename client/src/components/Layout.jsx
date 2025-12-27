@@ -95,6 +95,7 @@ export default function Layout({ children, showSportToggle = true }) {
     { path: '/badges', label: 'Badges', icon: TrophyIcon },
     { path: '/friends', label: 'Amis', icon: UserGroupIcon },
     { path: '/events', label: 'Événements', icon: CalendarIcon },
+    { path: '/plans', label: 'Plans', icon: CalendarIcon },
     { path: '/stats', label: 'Stats', icon: ChartBarIcon },
     { path: '/feed', label: 'Feed', icon: NewspaperIcon },
   ];
@@ -107,6 +108,7 @@ export default function Layout({ children, showSportToggle = true }) {
     { path: '/friends', label: 'Amis', icon: UserGroupIcon },
     { path: '/challenges', label: 'Challenges', icon: FireIcon },
     { path: '/events', label: 'Événements', icon: CalendarIcon },
+    { path: '/plans', label: 'Plans', icon: CalendarIcon },
     { path: '/stats', label: 'Stats', icon: ChartBarIcon },
     { path: '/profile', label: 'Profil', icon: UserCircleIcon },
   ];

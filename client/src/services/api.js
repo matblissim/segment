@@ -639,3 +639,68 @@ export const profileApi = {
     return response.data;
   },
 };
+
+// Training Plans API
+export const plansApi = {
+  // Obtenir tous les plans de l'utilisateur
+  getPlans: async () => {
+    const response = await axios.get(`${API_BASE_URL}/training-plans`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Obtenir un plan avec toutes ses séances
+  getPlan: async (planId) => {
+    const response = await axios.get(`${API_BASE_URL}/training-plans/${planId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  // Créer un nouveau plan
+  createPlan: async (planConfig) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/training-plans`,
+      planConfig,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Marquer une séance comme complétée
+  completeSession: async (sessionId, completionData) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/training-plans/sessions/${sessionId}/complete`,
+      completionData,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Obtenir les séances de la semaine en cours
+  getCurrentWeekSessions: async (planId) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/training-plans/${planId}/current-week`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Obtenir les stats d'un plan
+  getPlanStats: async (planId) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/training-plans/${planId}/stats`,
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  },
+
+  // Supprimer un plan
+  deletePlan: async (planId) => {
+    const response = await axios.delete(`${API_BASE_URL}/training-plans/${planId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+};
