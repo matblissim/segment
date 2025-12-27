@@ -110,7 +110,7 @@ class TrainingPlan {
    */
   static async getUserPlans(userId) {
     const result = await pool.query(
-      `SELECT p.*, e.name as event_name, e.start_date_local as event_date,
+      `SELECT p.*, e.name as event_name, e.event_date,
         (SELECT COUNT(*) FROM training_sessions WHERE plan_id = p.id) as total_sessions,
         (SELECT COUNT(*) FROM training_sessions WHERE plan_id = p.id AND completed = true) as completed_sessions
       FROM training_plans p
@@ -128,7 +128,7 @@ class TrainingPlan {
   static async getPlanWithSessions(planId, userId) {
     // Vérifier que le plan appartient à l'utilisateur
     const planResult = await pool.query(
-      `SELECT p.*, e.name as event_name, e.start_date_local as event_date
+      `SELECT p.*, e.name as event_name, e.event_date
       FROM training_plans p
       LEFT JOIN events e ON p.event_id = e.id
       WHERE p.id = $1 AND p.user_id = $2`,
