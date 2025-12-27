@@ -17,6 +17,7 @@ import eventsRoutes from './routes/events.js';
 import challengesRoutes from './routes/challenges.js';
 import aiCoachingRoutes from './routes/ai-coaching.js';
 import profileRoutes from './routes/profile.js';
+import trainingPlansRoutes from './routes/trainingPlans.js';
 
 // Import de la configuration DB et du worker
 import { pool, redis } from './config/database.js';
@@ -64,6 +65,9 @@ app.use('/api/ai', aiCoachingRoutes);
 
 // Routes profile (nécessite authentification)
 app.use('/api/profile', profileRoutes);
+
+// Routes training plans (nécessite authentification)
+app.use('/api/training-plans', trainingPlansRoutes);
 
 // Routes Strava legacy (pour compatibilité)
 app.use('/api/strava', stravaRoutes);
